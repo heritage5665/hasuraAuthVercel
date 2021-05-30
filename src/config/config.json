@@ -1,0 +1,5 @@
+{
+  "secret": "some-secret-shit-goes-here",
+  "refreshTokenSecret": "some-secret-refresh-token-shit",
+  "connectionString": "mongodb+srv://waLkErNET:Ayomide@96@cluster0.tdqqy.mongodb.net/grey-auth?retryWrites=true&w=majority"
+}
