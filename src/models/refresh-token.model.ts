@@ -19,8 +19,6 @@ const schema = new Schema({
   created: { type: Date, default: Date.now },
   revoked: Date,
   replacedByToken: String,
-  isActive: Boolean,
-  isExpired: String
 });
 
 schema.virtual("isExpired").get(function (this: any) {

@@ -1,9 +1,6 @@
 import { json } from "body-parser";
 import express from "express";
-const InitiateMongoServer = require("./src/config/db");
 const user = require("./src/routes/user.route");
-
-InitiateMongoServer();
 
 const app = express();
 app.use(json());
