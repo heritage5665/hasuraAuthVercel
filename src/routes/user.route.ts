@@ -5,14 +5,16 @@ import { authenticate, refreshToken } from "../config/user.service";
 import Token from "../models/token.model";
 import crypto from "crypto";
 import sgMail from "@sendgrid/mail";
-
+import { v4 as uuidv4 } from 'uuid';
+import UserClient from '../hasura/user_client';
+import HasuraUserModel from '../hasura/types/user'
 sgMail.setApiKey("API KEY here");
 
 const router = express.Router();
-
 const User = require("../models/user.model");
 const config = require("../config/config.json");
 
+const HasuraUser: UserClient = UserClient.getInstance()
 /**
  * @method - POST
  * @param - /signup
@@ -20,7 +22,7 @@ const config = require("../config/config.json");
  */
 
 const isValidEmail: CustomValidator = (value) => {
-  return User.findUserByEmail(value).then((user: any) => {
+  return HasuraUser.findUserByEmail(value).then((user: any) => {
     if (user) {
       return Promise.reject("E-mail already in use");
     }
@@ -28,7 +30,7 @@ const isValidEmail: CustomValidator = (value) => {
 };
 
 const isValidPhoneNumber: CustomValidator = (value) => {
-  return User.findOne(value).then((user: any) => {
+  return HasuraUser.findOne(value).then((user: any) => {
     if (user) {
       return Promise.reject("Phone already in use");
     }
@@ -48,12 +50,15 @@ router.post(
   [
     check("email").custom(isValidEmail),
     check("email", "Please enter a valid email").isEmail(),
-    check("phonenumber").custom(isValidPhoneNumber),
-    check("phonenumber", "Please enter a phone number")
+    check("phone").custom(isValidPhoneNumber),
+    check("phone", "Please enter a phone number")
       .not()
       .isEmpty()
       .trim()
       .escape(),
+    check("fullname", "Please enter a fullname").not()
+      .isEmpty()
+      .isAlpha().trim().escape(),
     check("password", "Please enter a valid password").isLength({
       min: 8,
     }),
@@ -67,21 +72,21 @@ router.post(
       });
     }
 
-    const { fullname, email, phonenumber, password } = req.body;
+    let { fullname, email, phone, password } = req.body;
+    const user_type: string = "user"
+    const user_id: string = uuidv4()
+    const isVerified = false
+
+
     try {
-      const user = new User({
-        fullname,
-        email,
-        password,
-        phonenumber,
+      const salt = await bcrypt.genSalt(10);
+      password = await bcrypt.hash(password, salt);
+      await HasuraUser.save({
+        email, password, phone, fullname, user_type, user_id, isVerified
       });
 
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-
-      await user.save();
       const token = new Token({
-        _userId: user._id,
+        _userId: user_id,
         token: crypto.randomBytes(16).toString("hex"),
       });
 
