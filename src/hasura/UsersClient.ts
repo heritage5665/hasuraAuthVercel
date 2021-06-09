@@ -13,32 +13,88 @@ export default class UserClient extends HttpClient {
 
     public static getInstance() {
         if (!this.classInstance) {
-            this.classInstance = new UserClient();
+            this.classInstance = new UserClient()
         }
         return this.classInstance
     }
 
-    public getUsers = async () => await this.runQuuery(`
-         query MyQuery {
+    public getUsers = async () => await this.runQuuery(
+        `
+         query GetAllUsers {
             users {
-                id
-                email
-                phone
-                password
-                profile {
-                    id
-                    verification_id
-                    name
-                    business_name
-                    business_category
-                    dob
-                    available_for_order
-                    gender
-                    profile_picture
-                    user_id
-                    created_at
+                fullname
+                    email
+                    phonenumber
+                    password
+                    isVerified
+                    passwordResetToken
+                    passwordResetExpires
+            }
+        }
+        `, {}).then(response => console.log(response))
+
+    public findOne = async (id: string) => await this.runQuuery(
+        `
+             query GetUser($user_id:String!,status:String!) {
+                users(where:_and[{id:{_eq:$user_id}}, {status:$status}],limit:1) 
+                {
+                    fullname
+                    email
+                    phonenumber
+                    password
+                    isVerified
+                    passwordResetToken
+                    passwordResetExpires
                 }
             }
-        }`, {}).then(response => console.log(response))
-    public getUser = (id: string) => this.instance.get<User>(`/user/${id}`)
+        `, {}
+    ).then((response) => {
+        if (response.data == null || response.data == undefined) {
+            return Promise.reject("error in query")
+        }
+        if (Array.isArray(response.data.users)) {
+            var user: any = response.data.users[0]
+            if (user) {
+                return user
+            }
+            return Promise.reject("user not found")
+        }
+        return Promise.reject("user not found")
+    })
+
+    public findByEmail = async (email: string) => await this.runQuuery(
+        `query GetUser($email:String!,status:Boolean!) {
+                users(where:_and[{email:{_eq:$user_id}}, { isVerified:$status}])
+                {
+                    fullname
+                    email
+                    phonenumber                    
+                    password
+                    isVerified
+                    passwordResetToken
+                    passwordResetExpires
+                }
+            }
+        `, { "email": email, "isVerified": true }
+    )
+
+    public save = async (user: User) => await this.runQuuery(
+        ` 
+            mutation SaveUser($fullname:String!,$phone:String!,$email:String,$password:String!){
+                insert_users_one(object:{ 
+
+                }){
+                    id
+                    user_id
+                    fullname
+                    password
+                    email
+                    phonenumber
+                    isVerified
+
+                }
+            }
+        `, { ...user }
+    )
+
 }

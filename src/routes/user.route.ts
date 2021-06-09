@@ -30,7 +30,7 @@ const isValidEmail: CustomValidator = (value) => {
 const isValidPhoneNumber: CustomValidator = (value) => {
   return User.findOne(value).then((user: any) => {
     if (user) {
-      return Promise.reject("E-mail already in use");
+      return Promise.reject("Phone already in use");
     }
   });
 };
@@ -247,7 +247,7 @@ router.post(
     }
     const { email } = req.body;
     try {
-    } catch (error) {}
+    } catch (error) { }
   }
 );
 

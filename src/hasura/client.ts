@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import HasuraHeader from "./types/User"
+// import HasuraHeader from "./types/User"
 
 declare module 'axios' {
     interface AxiosResponse<T = any> extends Promise<T> {
