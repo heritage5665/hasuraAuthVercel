@@ -7,4 +7,5 @@ export default interface HasuraUserModel {
     phone: string;
     password: string;
     isVerified: boolean;
+    pin: string
 }

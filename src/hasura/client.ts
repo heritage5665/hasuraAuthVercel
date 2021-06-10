@@ -6,14 +6,17 @@ declare module 'axios' {
     }
 }
 
-export default abstract class HttpClient {
+export default abstract class HasuraHttpClient {
     protected readonly instance: AxiosInstance;
 
-    constructor(baseURL: string, headers: object) {
+    constructor() {
+
         this.instance = axios.create(
             {
-                baseURL: baseURL,
-                headers: headers
+                baseURL: 'https://convey-core.herokuapp.com/v1/graphql',
+                headers: {
+                    "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv"
+                }
             }
         )
         this._initializeResponseInterceptor();
@@ -26,7 +29,14 @@ export default abstract class HttpClient {
         )
     }
 
-    private _handleResponse = ({ data }: AxiosResponse) => data
+    private _handleResponse = ({ data }: AxiosResponse) => {
+        let response: any = data
+        if (response.errors) {
+            return Promise.reject(response.errors)
+        }
+        return response.data
+    }
+
     private _handleError = (error: any) => Promise.reject(error)
     public runQuuery = (query: string, variables: object) => this.instance.post("", {
         "variables": variables,
