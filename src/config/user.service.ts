@@ -2,7 +2,7 @@ const config = require("../config/config.json");
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { db } from "./db";
+// import { db } from "./db";
 import UserClient from '../hasura/user_client';
 import TokenClient from '../hasura/token_client';
 import { CustomValidator } from "express-validator";
@@ -214,27 +214,27 @@ export const isValidPhoneNumber: CustomValidator = async (value: string) => {
   }
 };
 
-export async function revokeToken({ token }: Token) {
-  const refreshToken = await getRefreshToken(token);
+// export async function revokeToken({ token }: Token) {
+//   const refreshToken = await getRefreshToken(token);
 
-  // revoke token and save
-  refreshToken.revoked = Date.now();
-  await refreshToken.save();
-}
+//   // revoke token and save
+//   refreshToken.revoked = Date.now();
+//   await refreshToken.save();
+// }
 
 export async function getById(id: string) {
   const user = await getUser(id);
   return basicDetails(user);
 }
 
-export async function getRefreshTokens(userId: string) {
-  // check that user exists
-  await getUser(userId);
+// export async function getRefreshTokens(userId: string) {
+//   // check that user exists
+//   await getUser(userId);
 
-  // return refresh tokens for user
-  const refreshTokens = await db.RefreshToken.find({ user: userId });
-  return refreshTokens;
-}
+//   //   // return refresh tokens for user
+//   //   const refreshTokens = await db.RefreshToken.find({ user: userId });
+//   //   return refreshTokens;
+// }
 
 // helper functions
 
