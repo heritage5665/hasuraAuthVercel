@@ -6,7 +6,8 @@ import { db } from "./db";
 import UserClient from '../hasura/user_client';
 import TokenClient from '../hasura/token_client';
 import { CustomValidator } from "express-validator";
-import express, { Response } from "express";
+import express, { Response, NextFunction } from "express";
+import { validationResult } from "express-validator";
 interface Authenticate {
   email: string;
   password: string;
@@ -16,7 +17,16 @@ const tokenDB = TokenClient.getInstance()
 interface Token {
   token: string;
 }
+export const validateInput = async (req: any, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
+  return next()
 
+};
 
 export async function getRefreshToken(token: string) {
   const refreshToken = await userDB.findUserWithToken(token)

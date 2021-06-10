@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken,
   isValidEmail, isValidPhoneNumber, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken
+  getUserWithEmail, generateAuthToken, validateInput
 } from "../config/user.service";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -227,7 +227,7 @@ router.post("/request-reset-token",
  */
 
 router.post("/verify-password-token",
-  [check("token", "Please enter a valid token").isNumeric()],
+  [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7 })],
   verifyToken,
   async (req: any, res: Response) => {
     const errors = validationResult(req);
@@ -285,125 +285,21 @@ router.post("/verify-password-token",
  * @description - Forgot Password
  */
 
-router.post("/forgot-password",
-  [check("email", "Please enter a valid email").isEmail()],
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-    const { email } = req.body;
-    try {
-      const user = await HasuraUser.findUserByEmail(email)
-        .then(user => {
-          if (!user) {
-            return res.status(404).send({
-              type: "not-found",
-              msg: "We were unable to find a user with the email on our server",
-            });
-          }
-          if (user && !user.isVerified) {
-            return res.status(400).send({
-              type: "user-not-verified",
-              msg: "Please verify your account before reseting password",
-            });
-          }
-          return user
-        })
-      if (user) {
-        await generateRefreshToken(user)
-          .then(async ({ pin }) => {
-            const content = {
-              to: email,
-              from: "support@me.com",
-              subject: "Password Reset Token",
-              html: `<body> <p> Your one time reset token is ${pin}</p></body>`,
-            };
-            await sgMail.send(content);
-            return res.status(200).json({
-              staus: true,
-              msg: "password change successfully"
-            });
-
-          })
-      }
-
-      return res.status(401).json({
-        status: false,
-        error: "user not found",
-        msg: "the email could not be authenticated"
-      }
-      )
-    } catch (error) {
-      return res.status(400).json({
-        status: false,
-        error: error,
-        msg: "error occured by updating user password"
-      })
-    }
-  }
-);
-
-
-/**
- * @method - POST
- * @param - /change-password
- * @description - Change Password
- */
-
 router.post("/change-password",
-  [check("new_passwordl", "Please enter a valid email").isEmail()],
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-    const { email } = req.body;
+  [check("password", "Please enter a valid password").isLength({ min: 8, }).isAlphanumeric().isStrongPassword(),],
+  [verifyToken, validateInput],
+  async (req: any, res: Response) => {
+
+    const { password } = req.body;
+    let user = req.user
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(password, salt)
     try {
-      const user = await HasuraUser.findUserByEmail(email)
-        .then(user => {
-          if (!user) {
-            return res.status(404).send({
-              type: "not-found",
-              msg: "We were unable to find a user with the email on our server",
-            });
-          }
-          if (user && !user.isVerified) {
-            return res.status(400).send({
-              type: "user-not-verified",
-              msg: "Please verify your account before reseting password",
-            });
-          }
-          return user
-        })
-      if (user) {
-        await generateRefreshToken(user)
-          .then(async ({ pin }) => {
-            const content = {
-              to: email,
-              from: "support@me.com",
-              subject: "Password Reset Token",
-              html: `<body> <p> Your one time reset token is ${pin}</p></body>`,
-            };
-            await sgMail.send(content);
-            return res.status(200).json({
-              staus: true,
-              msg: "password change successfully"
-            });
-
-          })
-      }
-
-      return res.status(401).json({
-        status: false,
-        error: "user not found",
-        msg: "the email could not be authenticated"
-      }
-      )
+      await HasuraUser.changePassword(user)
+      return res.status(201).json({
+        status: true,
+        msg: "password changed successfully, you can now login"
+      })
     } catch (error) {
       return res.status(400).json({
         status: false,
@@ -413,4 +309,5 @@ router.post("/change-password",
     }
   }
 );
+
 module.exports = router;

@@ -151,7 +151,7 @@ export default class UserClient extends HasuraHttpClient {
     public changePassword = async (user: any) => {
         const { password, user_id } = user
         if (!(password && user_id)) {
-            return Promise.reject("no password and username given")
+            return Promise.reject("user_id and password is  require")
         }
         const { afftected_rows } = await this.runQuuery(
             `
