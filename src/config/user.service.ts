@@ -4,7 +4,8 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { db } from "./db";
 import UserClient from '../hasura/user_client';
-import TokenClient from '../hasura/token_client'
+import TokenClient from '../hasura/token_client';
+import { CustomValidator } from "express-validator";
 interface Authenticate {
   email: string;
   password: string;
@@ -115,6 +116,21 @@ export async function authenticate({ email, password }: Authenticate, user: any)
 //     refreshToken: newRefreshToken.token,
 //   };
 // }
+export const isValidEmail: CustomValidator = (value: string) => {
+  return userDB.findUserByEmail(value).then((user: any) => {
+    if (user) {
+      return Promise.reject("E-mail already in use");
+    }
+  });
+};
+
+export const isValidPhoneNumber: CustomValidator = (value: string) => {
+  return userDB.findOne(value).then((user: any) => {
+    if (user) {
+      return Promise.reject("Phone already in use");
+    }
+  });
+};
 
 export async function revokeToken({ token }: Token) {
   const refreshToken = await getRefreshToken(token);

@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from "express";
 import { check, CustomValidator, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
-import { authenticate, generateRefreshToken } from "../config/user.service";
-import Token from "../models/token.model";
+import { authenticate, generateRefreshToken, isValidEmail, isValidPhoneNumber } from "../config/user.service";
+// import Token from "../models/token.model";
 import crypto from "crypto";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -11,8 +11,6 @@ import TokenClient from '../hasura/token_client'
 sgMail.setApiKey("API KEY here");
 
 const router = express.Router();
-const User = require("../models/user.model");
-const config = require("../config/config.json");
 
 const HasuraUser: UserClient = UserClient.getInstance()
 const HasuraToken: TokenClient = TokenClient.getInstance()
@@ -22,29 +20,7 @@ const HasuraToken: TokenClient = TokenClient.getInstance()
  * @description - User SignUp
  */
 
-const isValidEmail: CustomValidator = (value) => {
-  return HasuraUser.findUserByEmail(value).then((user: any) => {
-    if (user) {
-      return Promise.reject("E-mail already in use");
-    }
-  });
-};
 
-const isValidPhoneNumber: CustomValidator = (value) => {
-  return HasuraUser.findOne(value).then((user: any) => {
-    if (user) {
-      return Promise.reject("Phone already in use");
-    }
-  });
-};
-
-function setTokenCookie(res: Response, token: string) {
-  const cookieOptions = {
-    httpOnly: true,
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  };
-  res.cookie("refreshToken", token, cookieOptions);
-}
 
 router.post(
   "/signup",
