@@ -6,7 +6,7 @@
   "type":"module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd ./src && node index.ts",
+    "start": "cd ./build && node index.ts",
     "build": "tsc --project ./"
   },
    "engines": {
