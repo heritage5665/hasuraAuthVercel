@@ -6,6 +6,7 @@ import { db } from "./db";
 import UserClient from '../hasura/user_client';
 import TokenClient from '../hasura/token_client';
 import { CustomValidator } from "express-validator";
+import express, { Response } from "express";
 interface Authenticate {
   email: string;
   password: string;
@@ -59,7 +60,80 @@ export function decrypt(text: string) {
   return decrypted.toString();
 }
 
+export function expiresIn(minutes: any) {
+  const now = (new Date()).getTime()
+  return new Date(now + minutes * 60000)
+}
 
+
+export function generateAuthToken(user: any) {
+  const { user_id, email } = user
+  const expires = expiresIn(60)
+  let token = user_id + "::" + expires.getTime() + "::" + email
+  if (user.pin) {
+    token = token + "::" + user.pin;
+  }
+  const encryptedToken = encrypt(token)
+  return encryptedToken
+}
+
+
+export async function verifyUserAuthToken(token: string) {
+  const [user_id, expires] = decrypt(token).split("::")
+  if (parseInt(expires) < (new Date()).getTime()) {
+    return false
+  }
+  const user = await userDB.findOne(user_id)
+  if (user) {
+    return user
+  }
+  return false
+}
+
+export function verifyUserToken(user: any, email: string, res: Response) {
+
+  if (!user) {
+    return res.status(400).send({
+      type: "not-verified",
+      msg: "We were unable to find a valid token. Your token may have expired.",
+    });
+
+  }
+  if (user.email != email) {
+    return res.status(400).send({
+      type: "not-verified",
+      msg: "We were unable to find a valid token. Your token may have expired.",
+    });
+  }
+
+  if (user.isVerified) {
+    return res.status(400).send({
+      type: "already-verified",
+      msg: "This user has already been verified.",
+    });
+  }
+  return true
+
+}
+
+export async function getUserWithEmail(email: string, res: Response) {
+  return await userDB.findUserByEmail(email)
+    .then(user => {
+      if (!user) {
+        return res.status(404).send({
+          type: "not-found",
+          msg: "We were unable to find a user with the email on our server",
+        });
+      }
+      if (user && !user.isVerified) {
+        return res.status(400).send({
+          type: "user-not-verified",
+          msg: "Please verify your account before reseting password",
+        });
+      }
+      return user
+    })
+}
 
 
 export function generateRefreshToken(user: any) {
@@ -67,7 +141,7 @@ export function generateRefreshToken(user: any) {
   return tokenDB.save({
     user_id: user.user_id,
     pin: generateOTP(7),
-    expires: new Date((new Date()).getTime() + 7 * 60000)
+    expires: expiresIn(7)
   });
 }
 // needs to rewrite this also
@@ -116,20 +190,18 @@ export async function authenticate({ email, password }: Authenticate, user: any)
 //     refreshToken: newRefreshToken.token,
 //   };
 // }
-export const isValidEmail: CustomValidator = (value: string) => {
-  return userDB.findUserByEmail(value).then((user: any) => {
-    if (user) {
-      return Promise.reject("E-mail already in use");
-    }
-  });
+export const isValidEmail: CustomValidator = async (value: string) => {
+  const user = await userDB.findUserByEmail(value);
+  if (user) {
+    return Promise.reject("E-mail already in use");
+  }
 };
 
-export const isValidPhoneNumber: CustomValidator = (value: string) => {
-  return userDB.findOne(value).then((user: any) => {
-    if (user) {
-      return Promise.reject("Phone already in use");
-    }
-  });
+export const isValidPhoneNumber: CustomValidator = async (value: string) => {
+  const user = await userDB.findOne(value);
+  if (user) {
+    return Promise.reject("Phone already in use");
+  }
 };
 
 export async function revokeToken({ token }: Token) {

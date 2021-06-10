@@ -20,6 +20,18 @@ export default class TokenClient extends HttpClient {
         return this.classInstance
     }
 
+    public delete = async (user_id: string, pin: string) => await this.runQuuery(
+        `   
+        mutation CreateUserOne($user_id: String!,$pin:String!) {
+            delete_one_time_pins(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
+                returning{
+                    affected_rows
+                }
+            }
+        }
+        `, { user_id, pin }
+    )
+
     public save = async (token: HasuraTokenModel) => await this.runQuuery(
         ` 
         mutation CreateUserOne($user_id: String!,$pin:String!,$expires:timestamp) {

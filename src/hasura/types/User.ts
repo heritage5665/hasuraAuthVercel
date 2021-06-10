@@ -8,4 +8,5 @@ export default interface HasuraUserModel {
     password: string;
     isVerified: boolean;
     pin: string
+    expires: any
 }
