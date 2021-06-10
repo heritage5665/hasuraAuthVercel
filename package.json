@@ -8,6 +8,10 @@
     "start": "nodemon index.ts",
     "build": "tsc --project ./"
   },
+   "engines": {
+    "node": "14.x",
+    "yarn": "1.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

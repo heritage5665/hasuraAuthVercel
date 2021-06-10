@@ -310,4 +310,5 @@ router.post("/change-password",
   }
 );
 
-module.exports = router;
+// module.exports = router;
+export default router
