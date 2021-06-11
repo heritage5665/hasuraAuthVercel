@@ -153,7 +153,7 @@ export default class UserClient extends HasuraHttpClient {
                     isVerified:$isVerified
                 }){
                     returning{
-                        affected_rows
+                        user_id
                     }
                 }
             
@@ -162,9 +162,9 @@ export default class UserClient extends HasuraHttpClient {
         ).then(response => response)
             .then(({ update_users }) => update_users)
             .then(({ returning }) => {
-                const { affected_rows } = returning
-                if (affected_rows > 0) {
-                    return true
+                const { user_id } = returning
+                if (user_id == user_id) {
+                    return isVerified
                 }
                 return Promise.reject("error verifying user")
             })
