@@ -35,7 +35,7 @@ export default class UserClient extends HasuraHttpClient {
              query GetUserByKey($key:String!) {
                 users(where:{
                     _or: [
-                        { email: {_eq: $}},
+                        { email: {_eq: $key}},
                         { user_id: {_eq: $key}},
                         { phone: {_eq: $key}}
                     ]
