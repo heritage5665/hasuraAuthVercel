@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -21,9 +21,6 @@ const HasuraToken: TokenClient = TokenClient.getInstance()
  * @param - /signup
  * @description - User SignUp
  */
-
-
-
 router.post(
   "/signup",
   signupValidation,
@@ -64,6 +61,43 @@ router.post(
     }
   }
 );
+
+router.post("/create-token", verifyToken,
+  async (req: any, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(400).json({
+        status: false,
+        error: "validation error",
+        msg: "authorization token required"
+      })
+    }
+    const { user } = req.user
+    const { email } = req.boby
+    if (user.email != email) {
+      return res.status(401).json({
+        status: false,
+        error: "unauthorized user",
+        msg: "invalid email given"
+      })
+    }
+    try {
+      const created_pin = generateRefreshToken(user)
+      return res.status(201).json({
+        status: true,
+        msg: "token created successfully",
+        data: { ...basicDetails(created_pin) }
+      })
+
+    } catch (error) {
+      return res.status(200).json({
+        status: false,
+        error
+      })
+    }
+
+  }
+
+)
 
 
 /**

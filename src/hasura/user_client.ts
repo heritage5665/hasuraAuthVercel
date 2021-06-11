@@ -131,7 +131,7 @@ export default class UserClient extends HasuraHttpClient {
         ).then(response => response)
             .then(({ one_time_pins }) => {
                 const { user, expires } = one_time_pins
-                if ((new Date(expires)).getTime() > (new Date()).getTime()) {
+                if ((new Date(expires)).getTime() <= (new Date()).getTime()) {
                     return user
                 }
                 return Promise.reject("expired token given")
