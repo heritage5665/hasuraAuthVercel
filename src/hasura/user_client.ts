@@ -111,7 +111,7 @@ export default class UserClient extends HasuraHttpClient {
         })
 
     public findUserWithToken = async (pin: string) => {
-        const expires = new Date();
+
         return await this.runQuuery(
             `
             query FindUserWithToken($pin:String!){
@@ -134,7 +134,7 @@ export default class UserClient extends HasuraHttpClient {
                 const { user, expires } = one_time_pins[0]
                 const expires_in = (new Date(expires)).getTime()
                 const now = (new Date()).getTime()
-                if (expires_in < now) {
+                if (expires_in > now) {
                     return user
                 }
                 return Promise.reject("expired token given")
