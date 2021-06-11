@@ -40,7 +40,7 @@ router.post("/signup",
       .isAlpha().trim().escape(),
     check("password", "Please enter a valid password").isLength({
       min: 8,
-    }).isAlphanumeric().isStrongPassword(),
+    }).isStrongPassword(),
   ], async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
