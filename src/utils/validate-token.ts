@@ -11,8 +11,12 @@ export const verifyToken = async (req: any, res: Response, next: NextFunction) =
     });
   }
   try {
-    req.user = verifyUserAuthToken(token);
-    next(req);
+    await verifyUserAuthToken(token)
+      .then(user => {
+        req.user = user
+        next(req)
+      })
+      .catch(error => res.status(400).json({ error }));
   } catch (err) {
     res.status(400).json({ error: err });
   }
