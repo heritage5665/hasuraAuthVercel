@@ -5,7 +5,10 @@ import { verifyUserAuthToken } from "../config/user.service.js";
 export const verifyToken = async (req: any, res: Response, next: NextFunction) => {
   const token = req.header("Authorization");
   if (!token) {
-    return res.status(401).json({ error: "Access denied" });
+    return res.status(401).json({
+      error: "Access denied",
+      msg: "Authoriztion token required"
+    });
   }
   try {
     const verified = verifyUserAuthToken(token);
@@ -13,7 +16,7 @@ export const verifyToken = async (req: any, res: Response, next: NextFunction) =
       return res.status(401).json({ error: "Access denied" });
     }
     req.user = verified;
-    next();
+    next(req);
   } catch (err) {
     res.status(400).json({ error: "Token is not valid" });
   }
