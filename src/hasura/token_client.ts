@@ -1,3 +1,4 @@
+import { response } from "express";
 import HttpClient from "./client.js";
 
 interface HasuraTokenModel {
@@ -30,7 +31,11 @@ export default class TokenClient extends HttpClient {
             }
         }
         `, { user_id, pin }
-    )
+    ).then(response => response).then(({ returning }) => {
+        const { id } = returning
+        if (id) return true
+        return false
+    })
 
     public save = async (token: HasuraTokenModel) => await this.runQuuery(
         ` 
