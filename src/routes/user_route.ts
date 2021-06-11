@@ -62,6 +62,11 @@ router.post(
   }
 );
 
+/**
+ * @method - POST
+ * @param - /create-token
+ * @description - Create token after signup
+ */
 router.post("/create-token", verifyToken,
   async (req: any, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -72,7 +77,7 @@ router.post("/create-token", verifyToken,
       })
     }
     const { user } = req.user
-    const { email } = req.boby
+    const { email } = req.body
     if (user.email != email) {
       return res.status(401).json({
         status: false,
@@ -81,11 +86,18 @@ router.post("/create-token", verifyToken,
       })
     }
     try {
-      const created_pin = generateRefreshToken(user)
+      const { pin } = await generateRefreshToken(user)
+      const content = {
+        to: email,
+        from: "support@me.com",
+        subject: "Email Verification",
+        html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
+      };
+      await sgMail.send(content);
       return res.status(201).json({
         status: true,
         msg: "token created successfully",
-        data: { ...basicDetails(created_pin) }
+        data: { token: pin }
       })
 
     } catch (error) {
