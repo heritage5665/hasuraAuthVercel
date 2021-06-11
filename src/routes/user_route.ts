@@ -202,47 +202,16 @@ router.post(
 
 router.post("/request-reset-token",
   [check("email", "Please enter a valid email").isEmail(),
-  ],
+  ], validateInput,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
     const { email } = req.body;
     try {
-      const user = await getUserWithEmail(email, res)
-      if (!(user instanceof Response)) {
-        const { pin } = await generateRefreshToken(user)
-        user.pin = pin
-        const auth_token = generateAuthToken(user)
-
-        const content = {
-          to: email,
-          from: "support@me.com",
-          subject: "Password Reset Token",
-          html: `<body> <p> Your one time reset token is ${pin}</p></body>`,
-        };
-        await sgMail.send(content);
-        return res.status(200).json({
-          staus: true,
-          data: {
-            auth_token
-          },
-          msg: "please check your email for your reset token, it expires in 7 minutes"
-        });
-
-
-      }
-      return user
-
-
+      return await getUserWithEmail(email, res)
+        .then(async user => await createVerificationTokenFor(user, sgMail, res))
     } catch (error) {
       return res.status(400).json({
         status: false,
-        error: error,
-        msg: "error occured by updating user password"
+        ...error
       })
     }
   }

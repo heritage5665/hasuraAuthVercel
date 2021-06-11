@@ -125,20 +125,10 @@ export function verifyUserToken(user: any, email: string, res: Response) {
 }
 
 export async function getUserWithEmail(email: string, res: Response) {
-  return await userDB.findUserByEmail(email)
+  return await userDB.findOne(email)
     .then(user => {
-      if (!user) {
-        return res.status(404).send({
-          type: "not-found",
-          msg: "We were unable to find a user with the email on our server",
-        });
-      }
-      if (user && !user.isVerified) {
-        return res.status(400).send({
-          type: "user-not-verified",
-          msg: "Please verify your account before reseting password",
-        });
-      }
+      if (!user) return Promise.reject({ msg: "user with  email not found on this server", error: "user not found" })
+      if (!user.isVerified) Promise.reject({ msg: "your account need verification", error: "email activation neede" })
       return user
     })
 }
