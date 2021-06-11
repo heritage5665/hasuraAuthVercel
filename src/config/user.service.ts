@@ -197,7 +197,15 @@ export const isValidEmail: CustomValidator = async (value: string) => {
     return Promise.reject("E-mail already in use");
   }
 };
+export const validateResetToken = async (token: string, user_id: string) => {
+  const user = await userDB.findUserWithToken(token).
+    then(async user => {
+      if (!user) return Promise.reject({ msg: "user with  email not found on this server", error: "user not found" })
+      if (user_id != user.user_id) Promise.reject({ msg: "token validation failed", error: "unathorized token" })
+      return await tokenDB.delete(user_id, token)
+    })
 
+}
 export const createVerificationTokenFor = async (user: any, sgMail: any, res: Response) => {
   const { pin } = await generateRefreshToken(user)
   const content = {
@@ -211,7 +219,7 @@ export const createVerificationTokenFor = async (user: any, sgMail: any, res: Re
   const auth_token = generateAuthToken(user, seve_minutes)
   return res.status(201).json({
     status: true,
-    msg: "token created successfully",
+    msg: "token created successfully, please check your email",
     data: { token: pin, auth_token }
   })
 }
@@ -279,7 +287,12 @@ export const VerifyEmailvalidation = [
 ]
 
 export const validateEmail = [check("email", "Email is not valid").isEmail()]
-export const validateLoginInput = [check("email", "Please enter a valid email").isEmail(),
-check("password", "Please enter a valid password").isLength({
-  min: 8
-})]
+export const validateLoginInput = [
+  check("email", "Please enter a valid email").isEmail(),
+  check("password", "Please enter a valid password").isLength({
+    min: 8
+  })
+]
+
+export const validateTokenInput = [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7 })]
+

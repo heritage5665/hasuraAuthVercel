@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor, validateLoginInput
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor, validateLoginInput, validateTokenInput, validateResetToken
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -201,8 +201,7 @@ router.post(
  */
 
 router.post("/request-reset-token",
-  [check("email", "Please enter a valid email").isEmail(),
-  ], validateInput,
+  validateEmail, validateInput,
   async (req: Request, res: Response) => {
     const { email } = req.body;
     try {
@@ -225,55 +224,24 @@ router.post("/request-reset-token",
  */
 
 router.post("/verify-reset-token",
-  [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7 })],
-  verifyToken,
+  validateTokenInput, validateInput, verifyToken,
   async (req: any, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
     const { token } = req.body;
     const { user_id } = req.user
-    try {
-      const user = await HasuraUser.findUserWithToken(token)
-      if (!user) {
-        return res.status(401).json({
-          status: false,
-          error: "user not found",
-          msg: "the user with given token not found on this server"
-        }
-        )
-      }
-      const token_owner_user_id = user.user_id
-      if (token_owner_user_id != user_id) {
-        return res.status(401).json(
-          {
-            status: false,
-            error: "invalid otp given",
-            msg: "reset token cannot be validated"
-          }
-        )
-      }
-      await HasuraToken.delete(user_id, token)
-      const auth_token = generateAuthToken(req.user)
-      return res.status(200).json({
-        status: true,
-        data: {
-          auth_token
-        },
-        msg: "validation successful"
-      })
-
-
-    } catch (error) {
-      return res.status(400).json({
+    await validateResetToken(token, user_id)
+      .then(async validated => {
+        const auth_token = generateAuthToken(req.user)
+        return res.status(200).json({
+          status: true,
+          data: {
+            auth_token
+          },
+          msg: "validation successful"
+        })
+      }).catch(error => res.status(401).json({
         status: false,
-        error: error,
-        msg: "error occured by updating user password"
-      })
-    }
+        ...error
+      }))
   }
 );
 
