@@ -75,17 +75,17 @@ export default class UserClient extends HasuraHttpClient {
                 $pin:String!,$expires:timestamp,$user_type:String!) {
                     insert_users_one(
                         object: {
-                                user_id: $user_id
-                                user_type:$user_type
-                                fullname:$fullname
-                                email:$email
+                                user_id: $user_id,
+                                user_type:$user_type,
+                                fullname:$fullname,
+                                email:$email,
                                 password:$password,
-                                isVerified:$isVerified
-                                phone:$phone
+                                isVerified:$isVerified,
+                                phone:$phone,
                                 one_time_pins:{
                                     data:[
                                         {
-                                            pin:$pin
+                                            pin:$pin,
                                             expires:$expires
                                         }
                                     ]
