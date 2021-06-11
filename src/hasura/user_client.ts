@@ -71,11 +71,13 @@ export default class UserClient extends HasuraHttpClient {
     public save = async (user: User) => await this.runQuuery(
         ` 
             mutation CreateUserOne($user_id: String!,$fullname:String!,$email:String!,
-                $password:String!,$isVerified:String!,$phone:String,$pin:String!,$expires:timestamp) {
+                $password:String!,$isVerified:String!,$phone:String,
+                $pin:String!,$expires:timestamp,$user_type:String!) {
                     insert_users_one(
                         object: {
-                                user_id: $user_id,
-                                fullname:$fullname,
+                                user_id: $user_id
+                                user_type:$user_type
+                                fullname:$fullname
                                 email:$email
                                 password:$password,
                                 isVerified:$isVerified

@@ -56,8 +56,11 @@ router.post(
         })
         .status(201);
     } catch (err) {
-      console.log(err);
-      res.status(500).send("Error in Saving");
+      // console.log(err);
+      res.status(500).json({
+        status: false,
+        msg: err
+      });
     }
   }
 );
