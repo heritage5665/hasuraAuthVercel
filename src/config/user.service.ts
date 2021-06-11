@@ -203,7 +203,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
 //   };
 // }
 export const isValidEmail: CustomValidator = async (value: string) => {
-  const user = await userDB.findUserByEmail(value);
+  const user = await userDB.findOne(value);
   if (user) {
     return Promise.reject("E-mail already in use");
   }
