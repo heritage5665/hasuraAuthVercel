@@ -262,5 +262,5 @@ export const signupValidation = [
     .isAlpha().trim().escape(),
   check("password", "Please enter a valid password").isLength({
     min: 8,
-  }).isStrongPassword(),
+  }),
 ]
