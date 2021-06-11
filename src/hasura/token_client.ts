@@ -25,7 +25,7 @@ export default class TokenClient extends HttpClient {
         mutation CreateUserOne($user_id: String!,$pin:String!) {
             delete_one_time_pins(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
                 returning{
-                    affected_rows
+                    affected_row
                 }
             }
         }
@@ -37,7 +37,7 @@ export default class TokenClient extends HttpClient {
         mutation CreateUserOne($user_id: String!,$pin:String!,$expires:timestamp) {
             delete_one_time_pins(where:{user_id:{_eq:$user_id}}){
                 returning{
-                    affected_rows
+                    affected_row
                 }
             }
             insert_one_time_pins_one( object: {user_id:$user_id,pin:$pin,
@@ -51,8 +51,5 @@ export default class TokenClient extends HttpClient {
         }
         `, { ...token }
     ).then(response => response).then(({ insert_one_time_pins }) => insert_one_time_pins)
-
-
-
 
 }
