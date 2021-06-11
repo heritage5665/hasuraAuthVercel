@@ -184,9 +184,9 @@ router.post(
       });
 
     const { email, password } = req.body;
-    authenticate({ email, password }, user)
-      .then(resp => res.json(resp))
-      .catch(next);
+    await authenticate({ email, password }, user)
+      .then(resp => res.status(200).json(resp))
+      .catch(error => res.status(200).json({ error }));
   }
 );
 
@@ -253,7 +253,7 @@ router.post("/request-reset-token",
  * @description - Forgot Password
  */
 
-router.post("/verify-password-token",
+router.post("/verify-reset-token",
   [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7 })],
   verifyToken,
   async (req: any, res: Response) => {
@@ -311,8 +311,7 @@ router.post("/verify-password-token",
  * @param - /forgot-password
  * @description - Forgot Password
  */
-
-router.post("/change-password",
+router.post("/reset-password",
   [check("password", "Please enter a valid password").isLength({ min: 8, }).isAlphanumeric().isStrongPassword(),],
   [verifyToken, validateInput],
   async (req: any, res: Response) => {
@@ -321,6 +320,37 @@ router.post("/change-password",
     let user = req.user
     const salt = await bcrypt.genSalt(10)
     user.password = await bcrypt.hash(password, salt)
+    try {
+      await HasuraUser.changePassword(user)
+      return res.status(201).json({
+        status: true,
+        msg: "password reset successfully, you can now login"
+      })
+    } catch (error) {
+      return res.status(400).json({
+        status: false,
+        error: error,
+        msg: "error occured by updating user password"
+      })
+    }
+  }
+);
+
+router.post("/change-password",
+  [check("old_password", "Please enter a valid password").isLength({ min: 8, }),
+  check("new_password", "Please enter a valid password").isLength({ min: 8, })],
+  verifyToken, validateInput,
+  async (req: any, res: Response) => {
+    const { new_password, old_password } = req.body;
+    let user = req.user
+    if (!user || !bcrypt.compareSync(old_password, user.password)) {
+      return res.status(401).json({
+        status: false,
+        msg: "old password do not match"
+      })
+    }
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(new_password, salt)
     try {
       await HasuraUser.changePassword(user)
       return res.status(201).json({
@@ -336,6 +366,7 @@ router.post("/change-password",
     }
   }
 );
+
 
 // module.exports = router;
 export default router
