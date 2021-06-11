@@ -93,6 +93,9 @@ export default class UserClient extends HasuraHttpClient {
                             }
                     ){
                             user_id
+                            fullname
+                            email
+                            phone
                             created_at
                     }
                 }

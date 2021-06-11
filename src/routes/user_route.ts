@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import UserClient from '../hasura/user_client.js';
 import TokenClient from '../hasura/token_client.js'
 import { verifyToken } from '../utils/validate-token.js';
-sgMail.setApiKey("API KEY here");
+sgMail.setApiKey("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");
 
 const router = express.Router();
 
@@ -38,20 +38,20 @@ router.post(
       password = await bcrypt.hash(password, salt);
       const pin = generateOTP(7)
       const expires = expiresIn(7)
-      const result = await HasuraUser.save({
+      const user = await HasuraUser.save({
         email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
       });
 
-      // const content = {
-      //   to: email,
-      //   from: "support@me.com",
-      //   subject: "Email Verification",
-      //   html: `<body> <p> Please verify your account by clicking the link: <a href="http://' + ${req.headers.host} + 'confirmation/${pin}' </a></p></body>`,
-      // };
-      // await sgMail.send(content);
+      const content = {
+        to: email,
+        from: "support@me.com",
+        subject: "Email Verification",
+        html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
+      };
+      await sgMail.send(content);
       return res
         .json({
-          data: { user: { ...result } },
+          data: { user: { ...user }, auth_token: generateAuthToken(user) },
           message: "Please check your email for verification code",
         })
         .status(201);
