@@ -113,7 +113,7 @@ export default class UserClient extends HasuraHttpClient {
         const expires = new Date();
         return await this.runQuuery(
             `
-            query FindUserWithToken($token:String!){
+            query FindUserWithToken($pin:String!){
                 one_time_pins(where:{pin:{_eq:$pin}},limit:1,order_by:{expires:desc}){
                     expires
                     user{
