@@ -6,7 +6,7 @@ import UserClient from '../hasura/user_client.js';
 import TokenClient from '../hasura/token_client.js';
 import { CustomValidator } from "express-validator";
 import { Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
+import { validationResult, check } from "express-validator";
 interface Authenticate {
   email: string;
   password: string;
@@ -168,13 +168,16 @@ export async function authenticate({ email, password }: Authenticate, user: any)
   if (!user || !bcrypt.compareSync(password, user.password)) {
     throw "Username or password is incorrect";
   }
+  if (user.email != email) {
+    throw "Username or password is incorrect";
+  }
   const refreshToken = await generateRefreshToken(user);
   const authToken = generateAuthToken(user);
 
   return {
     ...basicDetails(user),
     authToken,
-    // refreshToken: refreshToken.pin,
+    refreshToken: refreshToken.pin,
   };
 }
 // needs complete rewrite
@@ -243,3 +246,21 @@ export async function getUser(id: string) {
   if (!user) throw "User not found";
   return user;
 }
+
+
+export const signupValidation = [
+  check("email").custom(isValidEmail),
+  check("email", "Please enter a valid email").isEmail(),
+  check("phone").custom(isValidPhoneNumber),
+  check("phone", "Please enter a phone number")
+    .not()
+    .isEmpty()
+    .trim()
+    .escape(),
+  check("fullname", "Please enter a fullname").not()
+    .isEmpty()
+    .isAlpha().trim().escape(),
+  check("password", "Please enter a valid password").isLength({
+    min: 8,
+  }).isStrongPassword(),
+]

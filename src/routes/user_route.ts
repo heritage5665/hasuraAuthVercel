@@ -2,9 +2,8 @@ import express, { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
-  authenticate, generateOTP, generateRefreshToken,
-  isValidEmail, isValidPhoneNumber, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput
+  authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -25,36 +24,15 @@ const HasuraToken: TokenClient = TokenClient.getInstance()
 
 
 
-router.post("/signup",
-  [
-    check("email").custom(isValidEmail),
-    check("email", "Please enter a valid email").isEmail(),
-    check("phone").custom(isValidPhoneNumber),
-    check("phone", "Please enter a phone number")
-      .not()
-      .isEmpty()
-      .trim()
-      .escape(),
-    check("fullname", "Please enter a fullname").not()
-      .isEmpty()
-      .isAlpha().trim().escape(),
-    check("password", "Please enter a valid password").isLength({
-      min: 8,
-    }).isStrongPassword(),
-  ], async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-
+router.post(
+  "/signup",
+  signupValidation,
+  validateInput,
+  async (req: Request, res: Response) => {
     let { fullname, email, phone, password } = req.body;
     const user_type: string = "user"
     const user_id: string = uuidv4()
     const isVerified = false
-
-
     try {
       const salt = await bcrypt.genSalt(10);
       password = await bcrypt.hash(password, salt);
