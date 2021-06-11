@@ -50,6 +50,7 @@ export default class TokenClient extends HttpClient {
             }
         }
         `, { ...token }
-    ).then(response => response).then(({ insert_one_time_pins_one }) => insert_one_time_pins_one)
+    ).then(response => response)
+        .then(({ insert_one_time_pins_one }) => insert_one_time_pins_one)
 
 }
