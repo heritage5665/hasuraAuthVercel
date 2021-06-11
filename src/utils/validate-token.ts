@@ -11,14 +11,10 @@ export const verifyToken = async (req: any, res: Response, next: NextFunction) =
     });
   }
   try {
-    const verified = verifyUserAuthToken(token);
-    if (!verified) {
-      return res.status(401).json({ error: "Access denied" });
-    }
-    req.user = verified;
+    req.user = verifyUserAuthToken(token);
     next(req);
   } catch (err) {
-    res.status(400).json({ error: "Token is not valid" });
+    res.status(400).json({ error: err });
   }
 
 };

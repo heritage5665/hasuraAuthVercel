@@ -89,14 +89,13 @@ export function generateAuthToken(user: any) {
 
 export async function verifyUserAuthToken(token: string) {
   const [user_id, expires] = decrypt(token).split("::")
-  if (parseInt(expires) < (new Date()).getTime()) {
-    return false
-  }
+  if (parseInt(expires) < (new Date()).getTime())
+    return Promise.reject("expired token")
+
   const user = await userDB.findOne(user_id)
-  if (user) {
-    return user
-  }
-  return false
+  if (!user)
+    return Promise.reject("invalid auth token")
+  return user
 }
 
 export function verifyUserToken(user: any, email: string, res: Response) {
