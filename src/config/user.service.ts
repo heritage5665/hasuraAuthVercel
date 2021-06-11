@@ -1,10 +1,10 @@
 const config = require("../config/config.json");
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 // import { db } from "./db";
-import UserClient from '../hasura/user_client';
-import TokenClient from '../hasura/token_client';
+import UserClient from '../hasura/user_client.js';
+import TokenClient from '../hasura/token_client.js';
 import { CustomValidator } from "express-validator";
 import express, { Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
@@ -34,11 +34,11 @@ export async function getRefreshToken(token: string) {
   return refreshToken;
 }
 // need to rewrite this
-export function generateJwtToken(user: any) {
-  return jwt.sign({ sub: user.id, id: user.id }, config.secret, {
-    expiresIn: "15m",
-  });
-}
+// export function generateJwtToken(user: any) {
+//   return jwt.sign({ sub: user.id, id: user.id }, config.secret, {
+//     expiresIn: "15m",
+//   });
+// }
 
 
 export function generateOTP(number_of_digits: Number) {
@@ -170,12 +170,12 @@ export async function authenticate({ email, password }: Authenticate, user: any)
     throw "Username or password is incorrect";
   }
   const refreshToken = await generateRefreshToken(user);
-  const jwtToken = generateJwtToken(user);
+  const authToken = generateAuthToken(user);
 
   return {
     ...basicDetails(user),
-    jwtToken,
-    refreshToken: refreshToken.pin,
+    authToken,
+    // refreshToken: refreshToken.pin,
   };
 }
 // needs complete rewrite

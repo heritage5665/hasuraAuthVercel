@@ -5,12 +5,12 @@ import {
   authenticate, generateOTP, generateRefreshToken,
   isValidEmail, isValidPhoneNumber, expiresIn, verifyUserToken,
   getUserWithEmail, generateAuthToken, validateInput
-} from "../config/user.service";
+} from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
-import UserClient from '../hasura/user_client';
-import TokenClient from '../hasura/token_client'
-import { verifyToken } from '../utils/validate-token';
+import UserClient from '../hasura/user_client.js';
+import TokenClient from '../hasura/token_client.js'
+import { verifyToken } from '../utils/validate-token.js';
 sgMail.setApiKey("API KEY here");
 
 const router = express.Router();
