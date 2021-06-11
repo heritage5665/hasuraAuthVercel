@@ -55,7 +55,7 @@ export function encrypt(text: string) {
   let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + "." + encrypted.toString('hex') + "." + key.toString();
+  return iv.toString('hex') + "." + encrypted.toString('hex') + "." + key.toString('hex');
 }
 
 export function decrypt(text: string) {
