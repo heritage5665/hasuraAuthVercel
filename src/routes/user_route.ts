@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -67,41 +67,28 @@ router.post(
  * @param - /create-token
  * @description - Create token after signup
  */
-router.post("/create-token",
+router.post("/resend-token",
   validateEmail,
   verifyToken,
   async (req: any, res: Response, next: NextFunction) => {
-    if (!req.user) {
+    if (!req.user || req.user == undefined || req.user == null) {
       return res.status(400).json({
         status: false,
         error: "validation error",
         msg: "authorization token required"
       })
     }
-    const user = req.user
-    const { email } = req.body
-    if (user.email != email) {
-      return res.status(401).json({
-        status: false,
-        error: "unauthorized user",
-        msg: "invalid email given"
-      })
-    }
     try {
-      const { pin } = await generateRefreshToken(user)
-      const content = {
-        to: email,
-        from: "support@me.com",
-        subject: "Email Verification",
-        html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
-      };
-      await sgMail.send(content);
-      return res.status(201).json({
-        status: true,
-        msg: "token created successfully",
-        data: { token: pin }
-      })
-
+      const user = req.user
+      const { email } = req.body
+      if (user.email != email) {
+        return res.status(401).json({
+          status: false,
+          error: "unauthorized user",
+          msg: "invalid email given"
+        })
+      }
+      return await createVerificationTokenFor(user, sgMail, res)
     } catch (error) {
       return res.status(200).json({
         status: false,
@@ -113,6 +100,35 @@ router.post("/create-token",
 
 )
 
+
+/**
+ * @method - POST
+ * @param - /create-token
+ * @description - Create token after signup
+ */
+router.post("/create-token",
+  validateEmail,
+  async (req: any, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body
+      const user = await HasuraUser.findOne(email)
+        .then(user => {
+          if (!user) return Promise.reject("user with email not found")
+          if (user.isVerified) return Promise.reject("user already verified")
+          return user
+        })
+      return await createVerificationTokenFor(user, sgMail, res)
+
+    } catch (error) {
+      return res.status(200).json({
+        status: false,
+        error
+      })
+    }
+
+  }
+
+)
 
 /**
  * @method - POST
@@ -330,7 +346,7 @@ router.post("/reset-password",
       return res.status(400).json({
         status: false,
         error: error,
-        msg: "error occured by updating user password"
+        msg: "error occured while updating user password"
       })
     }
   }

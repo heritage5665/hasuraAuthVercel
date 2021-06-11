@@ -75,9 +75,9 @@ export function expiresIn(minutes: any) {
 }
 
 
-export function generateAuthToken(user: any) {
+export function generateAuthToken(user: any, expires_in: number = 60) {
   const { user_id, email } = user
-  const expires = expiresIn(60)
+  const expires = expiresIn(expires_in)
   let token = user_id + "::" + expires.getTime() + "::" + email
   if (user.pin) {
     token = token + "::" + user.pin;
@@ -207,6 +207,24 @@ export const isValidEmail: CustomValidator = async (value: string) => {
     return Promise.reject("E-mail already in use");
   }
 };
+
+export const createVerificationTokenFor = async (user: any, sgMail: any, res: Response) => {
+  const { pin } = await generateRefreshToken(user)
+  const content = {
+    to: user.email,
+    from: "support@me.com",
+    subject: "Email Verification",
+    html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
+  };
+  await sgMail.send(content);
+  const seve_minutes = 7
+  const auth_token = generateAuthToken(user, seve_minutes)
+  return res.status(201).json({
+    status: true,
+    msg: "token created successfully",
+    data: { token: pin, auth_token }
+  })
+}
 
 export const isValidPhoneNumber: CustomValidator = async (value: string) => {
   const user = await userDB.findOne(value);
