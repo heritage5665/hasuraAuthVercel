@@ -110,14 +110,12 @@ export default class UserClient extends HasuraHttpClient {
         })
 
     public findUserWithToken = async (pin: string) => {
-        const expires = new Date((new Date()).getTime() + 7 * 60000);
+        const expires = new Date();
         return await this.runQuuery(
             `
-            query FindUserWithToken($token:String!,$expires:timestamp){
-                one_time_pins(where:_and:[
-                    {pin:{_eq:$pin}},
-                    {expires:{_lt:$expires}}
-                ],limit:1,order_by:{expires:desc}){
+            query FindUserWithToken($token:String!){
+                one_time_pins(where:{pin:{_eq:$pin}},limit:1,order_by:{expires:desc}){
+                    expires
                     user{
                         id 
                         user_id
@@ -129,10 +127,17 @@ export default class UserClient extends HasuraHttpClient {
                     }
                 }
             }
-          `, { pin, expires }
+          `, { pin }
         ).then(response => response)
-            .then(({ one_time_pins }) => one_time_pins).
-            then(({ user }) => user)
+            .then(({ one_time_pins }) => {
+                const { user, expires } = one_time_pins
+                if ((new Date(expires)).getTime() > (new Date()).getTime()) {
+                    return user
+                }
+                return Promise.reject("expired token given")
+
+            })
+
     }
 
     public verifyUser = async (user: any) => {
@@ -140,7 +145,7 @@ export default class UserClient extends HasuraHttpClient {
         const { user_id } = user
         return await this.runQuuery(
             `
-            query FindUserWithToken($user_id:String!,$isVerified:Boolean){
+            mutation VerifyUser($user_id:String!,$isVerified:Boolean){
                 update_users(where:{user_id:$userd_id},_set:{
                     isVerified:$isVerified
                 }){
@@ -153,22 +158,23 @@ export default class UserClient extends HasuraHttpClient {
             `, { isVerified, user_id }
         ).then(response => response)
             .then(({ update_users }) => update_users)
-            .then(({ affected_rows }) => {
+            .then(({ returning }) => {
+                const { affected_rows } = returning
                 if (affected_rows > 0) {
                     return true
                 }
-                return false
+                return Promise.reject("error verifying user")
             })
     }
 
     public changePassword = async (user: any) => {
         const { password, user_id } = user
         if (!(password && user_id)) {
-            return Promise.reject("user_id and password is  require")
+            return Promise.reject("user_id and password is  required")
         }
-        const { afftected_rows } = await this.runQuuery(
+        return await this.runQuuery(
             `
-            query FindUserWithToken($user_id:String!,$password:Boolean){
+            mutation changeUserPassword($user_id:String!,$password:Boolean){
                 update_users(where:{user_id:$userd_id},_set:{
                     password:$password
                 }){
@@ -180,9 +186,14 @@ export default class UserClient extends HasuraHttpClient {
             }
             `, { password, user_id }
         ).then(response => response)
-            .then(({ afftected_rows }) => afftected_rows)
-        if (afftected_rows > 0) return true
-        return false
+            .then(({ update_users }) => update_users)
+            .then(({ returning }) => {
+                const { affected_rows } = returning
+                if (affected_rows > 0) {
+                    return true
+                }
+                return Promise.reject("error verifying user")
+            })
 
     }
 

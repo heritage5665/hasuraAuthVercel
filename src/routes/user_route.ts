@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -73,23 +73,15 @@ router.post(
  */
 router.post(
   "/verify-token",
-  [
-    check("email", "Email is not valid").isEmail(),
-    check("email", "Email cannot be blank").notEmpty(),
-    check("token", "Token cannot be blank").notEmpty(),
-  ],
+  VerifyEmailvalidation,
+  validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-    const { email, token } = req.body
-    // Find a matching token
-    const user = await HasuraUser.findUserWithToken(token);
-    const canBeVerify = verifyUserToken(user, email, res);
-    if (canBeVerify == true)
+    try {
+      const { email, token } = req.body
+      // Find a matching token
+      const user = await HasuraUser.findUserWithToken(token);
+      const canBeVerify = verifyUserToken(user, email, res);
+      if (canBeVerify != true) return canBeVerify;
       await HasuraUser.verifyUser(user)
         .then(verified => {
           if (verified) {
@@ -98,14 +90,18 @@ router.post(
               msg: "user verified.",
             })
           }
-          return res.status(200).send({
-            status: false,
-            msg: "user not verified try again latter"
-          })
 
         })
 
-    return canBeVerify;
+    } catch (error) {
+      return res.status(401).json({
+        status: false,
+        error,
+        msg: "invalid or expired token"
+      })
+    }
+
+
 
   }
 );

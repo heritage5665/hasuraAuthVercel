@@ -29,7 +29,7 @@ export const validateInput = async (req: any, res: Response, next: NextFunction)
 
 export async function getRefreshToken(token: string) {
   const refreshToken = await userDB.findUserWithToken(token)
-  if (!refreshToken || !refreshToken.isActive) throw "Invalid token";
+  if (!refreshToken || !refreshToken.isVerified) throw "Invalid token";
   return refreshToken;
 }
 // need to rewrite this
@@ -263,4 +263,10 @@ export const signupValidation = [
   check("password", "Please enter a valid password").isLength({
     min: 8,
   }),
+]
+
+export const VerifyEmailvalidation = [
+  check("email", "Email is not valid").isEmail(),
+  check("email", "Email cannot be blank").notEmpty(),
+  check("token", "Token cannot be blank").notEmpty(),
 ]
