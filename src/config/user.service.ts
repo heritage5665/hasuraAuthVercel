@@ -270,3 +270,5 @@ export const VerifyEmailvalidation = [
   check("email", "Email cannot be blank").notEmpty(),
   check("token", "Token cannot be blank").notEmpty(),
 ]
+
+export const validateEmail = [check("email", "Email is not valid").isEmail()]

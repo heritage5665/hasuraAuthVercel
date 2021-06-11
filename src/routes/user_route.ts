@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -67,7 +67,9 @@ router.post(
  * @param - /create-token
  * @description - Create token after signup
  */
-router.post("/create-token", verifyToken,
+router.post("/create-token",
+  validateEmail,
+  verifyToken,
   async (req: any, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(400).json({
