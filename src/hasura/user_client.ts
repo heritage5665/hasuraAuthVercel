@@ -32,14 +32,15 @@ export default class UserClient extends HasuraHttpClient {
 
     public findOne = async (key: string) => await this.runQuuery(
         `
-             query GetUserByKey($key) {
-                users(where:_or:[
-                    {user_id:{_eq:$key}},
-                    {phone:{_eq:$key}},
-                    {email:{_eq:$key}},
-                ],limit:1) 
+             query GetUserByKey($key:String!) {
+                users(where:{
+                    _or: [
+                        { email: {_eq: $}},
+                        { user_id: {_eq: $key}},
+                        { phone: {_eq: $key}}
+                    ]
+                },limit:1)
                 {
-                    id
                     user_id
                     email
                     isVerified
@@ -50,14 +51,18 @@ export default class UserClient extends HasuraHttpClient {
     ).then((response) => response).then(({ users }) => users[0])
 
     public findUserByEmail = async (email: string) => await this.runQuuery(
-        `query GetUser($email:String!,status:Boolean!) {
-                users(where:_and[{email:{_eq:$user_id}}, { isVerified:$status}])
+        `query GetUser($email:String!,$isVerified:Boolean!) {
+                users(where:{
+                    _and: [
+                        { email: {_eq: $email}},
+                        { isVerified: {_eq: $isVerified}}
+                    ]
+                })
                 {
                     user_id
                     email
                     phone
                     isVerified
-                    created
                 }
             }
         `, { "email": email, "isVerified": true }
