@@ -55,11 +55,11 @@ export function encrypt(text: string) {
   let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + "||||" + encrypted.toString('hex') + "|||" + key;
+  return iv.toString('hex') + "." + encrypted.toString('hex') + "." + key.toString();
 }
 
 export function decrypt(text: string) {
-  const data = text.split("||||")
+  const data = text.split(".")
   const iv = Buffer.from(data[0], 'hex');
   const key = Buffer.from(data[2], 'hex')
   const encryptedText = Buffer.from(data[1], 'hex');
