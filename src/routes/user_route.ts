@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor, validateLoginInput
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';
@@ -177,30 +177,16 @@ router.post(
  */
 router.post(
   "/login",
-  [
-    check("email", "Please enter a valid email").isEmail(),
-    check("password", "Please enter a valid password").isLength({
-      min: 8,
-    }).isAlphanumeric().isStrongPassword(),
-  ],
+  validateLoginInput, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
     const user = await HasuraUser.findOne(req.body.email);
-
     if (!user.isVerified)
       return res.status(401).send({
         type: "not-verified",
         msg: "Your account has not been verified.",
       });
-
     const { email, password } = req.body;
-    await authenticate({ email, password }, user)
+    return await authenticate({ email, password }, user)
       .then(resp => res.status(200).json(resp))
       .catch(error => res.status(200).json({ error }));
   }

@@ -289,3 +289,7 @@ export const VerifyEmailvalidation = [
 ]
 
 export const validateEmail = [check("email", "Email is not valid").isEmail()]
+export const validateLoginInput = [check("email", "Please enter a valid email").isEmail(),
+check("password", "Please enter a valid password").isLength({
+  min: 8
+})]
