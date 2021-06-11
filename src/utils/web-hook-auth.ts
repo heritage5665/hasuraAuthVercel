@@ -10,21 +10,19 @@ export const AuthWebHook = async (req: any, res: Response, next: NextFunction) =
             msg: "Authoriztion token required"
         });
     }
-    try {
-        await verifyUserAuthToken(token)
-            .then(user => {
-                const { user_id, user_type } = user
-                // req.user = user
-                return res.status(200).json({
-                    "X-Hasura-User-Id": user_id,
-                    "X-Hasura-Role": user_type,
-                    "X-Hasura-Is-Owner": "false",
-                    "Cache-Control": "max-age=600"
-                })
+
+    await verifyUserAuthToken(token)
+        .then(user => {
+            const { user_id, user_type } = user
+            // req.user = user
+            return res.status(200).json({
+                "X-Hasura-User-Id": user_id,
+                "X-Hasura-Role": user_type,
+                "X-Hasura-Is-Owner": "false",
+                "Cache-Control": "max-age=600"
             })
-            .catch(error => res.status(400).json({ error }));
-    } catch (err) {
-        res.status(400).json({ error: err });
-    }
+        })
+        .catch(error => res.status(400).json({ error }));
+
 
 };
