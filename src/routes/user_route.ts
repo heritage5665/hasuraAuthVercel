@@ -78,7 +78,7 @@ router.post("/create-token",
         msg: "authorization token required"
       })
     }
-    const { user } = req.user
+    const user = req.user
     const { email } = req.body
     if (user.email != email) {
       return res.status(401).json({

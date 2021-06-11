@@ -4,13 +4,11 @@ import { verifyUserAuthToken } from "../config/user.service.js";
 // middleware to validate token
 export const AuthWebHook = async (req: any, res: Response, next: NextFunction) => {
     const token = req.header("Authorization");
-    if (!token) {
+    if (!token)
         return res.status(401).json({
             error: "Access denied",
             msg: "Authoriztion token required"
         });
-    }
-
     await verifyUserAuthToken(token)
         .then(user => {
             const { user_id, user_type } = user
@@ -23,6 +21,4 @@ export const AuthWebHook = async (req: any, res: Response, next: NextFunction) =
             })
         })
         .catch(error => res.status(400).json({ error }));
-
-
 };
