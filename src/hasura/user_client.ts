@@ -133,6 +133,7 @@ export default class UserClient extends HasuraHttpClient {
             .then(({ one_time_pins }) => {
                 const { user, expires } = one_time_pins
                 const expires_in = (new Date(expires)).getTime()
+                console.log(expires)
                 const now = (new Date()).getTime()
                 console.log(expires_in, now)
                 if (expires_in > now) {
