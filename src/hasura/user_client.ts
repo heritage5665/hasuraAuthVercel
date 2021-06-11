@@ -148,8 +148,8 @@ export default class UserClient extends HasuraHttpClient {
         const { user_id } = user
         return await this.runQuuery(
             `
-            mutation VerifyUser($user_id:String!,$isVerified:Boolean){
-                update_users(where:{user_id:$userd_id},_set:{
+            mutation VerifyUser($user_id:String!,$isVerified:Boolean!){
+                update_users(where:{user_id:{_eq:$user_id}},_set:{
                     isVerified:$isVerified
                 }){
                     returning{
