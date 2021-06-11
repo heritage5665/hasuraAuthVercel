@@ -43,6 +43,7 @@ export default class UserClient extends HasuraHttpClient {
                 {
                     user_id
                     email
+                    user_type
                     isVerified
                     password
                 }

@@ -14,7 +14,7 @@ export const verifyToken = async (req: any, res: Response, next: NextFunction) =
     await verifyUserAuthToken(token)
       .then(user => {
         req.user = user
-        next(req)
+        next()
       })
       .catch(error => res.status(400).json({ error }));
   } catch (err) {
