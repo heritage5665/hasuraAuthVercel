@@ -51,7 +51,7 @@ router.post(
       await sgMail.send(content);
       return res
         .json({
-          data: { user: { ...user }, auth_token: generateAuthToken(user) },
+          data: { user: { ...user }, auth_token: generateAuthToken(user), pin },
           message: "Please check your email for verification code",
         })
         .status(201);
@@ -62,42 +62,6 @@ router.post(
         msg: err
       });
     }
-  }
-);
-
-/**
- * @method - POST
- * @param - /login
- * @description - User Login
- */
-router.post(
-  "/login",
-  [
-    check("email", "Please enter a valid email").isEmail(),
-    check("password", "Please enter a valid password").isLength({
-      min: 8,
-    }).isAlphanumeric().isStrongPassword(),
-  ],
-  async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
-    }
-    const user = await HasuraUser.findOne(req.body.email);
-
-    if (!user.isVerified)
-      return res.status(401).send({
-        type: "not-verified",
-        msg: "Your account has not been verified.",
-      });
-
-    const { email, password } = req.body;
-    authenticate({ email, password }, user)
-      .then(resp => res.json(resp))
-      .catch(next);
   }
 );
 
@@ -145,6 +109,44 @@ router.post(
 
   }
 );
+
+/**
+ * @method - POST
+ * @param - /login
+ * @description - User Login
+ */
+router.post(
+  "/login",
+  [
+    check("email", "Please enter a valid email").isEmail(),
+    check("password", "Please enter a valid password").isLength({
+      min: 8,
+    }).isAlphanumeric().isStrongPassword(),
+  ],
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+    const user = await HasuraUser.findOne(req.body.email);
+
+    if (!user.isVerified)
+      return res.status(401).send({
+        type: "not-verified",
+        msg: "Your account has not been verified.",
+      });
+
+    const { email, password } = req.body;
+    authenticate({ email, password }, user)
+      .then(resp => res.json(resp))
+      .catch(next);
+  }
+);
+
+
 
 /**
  * @method - POST
