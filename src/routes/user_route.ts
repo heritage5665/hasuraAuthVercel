@@ -34,7 +34,7 @@ router.post(
       const salt = await bcrypt.genSalt(10);
       password = await bcrypt.hash(password, salt);
       const pin = generateOTP(7)
-      const expires = expiresIn(7)
+      const expires = expiresIn(60 * 24)
       const user = await HasuraUser.save({
         email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
       });
