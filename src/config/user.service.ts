@@ -1,4 +1,3 @@
-const config = require("../config/config.json");
 // import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -6,7 +5,7 @@ import crypto from "crypto";
 import UserClient from '../hasura/user_client.js';
 import TokenClient from '../hasura/token_client.js';
 import { CustomValidator } from "express-validator";
-import express, { Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 interface Authenticate {
   email: string;
