@@ -42,13 +42,13 @@ router.post(
         email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
       });
 
-      const content = {
-        to: email,
-        from: "support@me.com",
-        subject: "Email Verification",
-        html: `<body> <p> Please verify your account by clicking the link: <a href="http://' + ${req.headers.host} + 'confirmation/${pin}' </a></p></body>`,
-      };
-      await sgMail.send(content);
+      // const content = {
+      //   to: email,
+      //   from: "support@me.com",
+      //   subject: "Email Verification",
+      //   html: `<body> <p> Please verify your account by clicking the link: <a href="http://' + ${req.headers.host} + 'confirmation/${pin}' </a></p></body>`,
+      // };
+      // await sgMail.send(content);
       return res
         .json({
           data: { user: { ...result } },
@@ -56,7 +56,7 @@ router.post(
         })
         .status(201);
     } catch (err) {
-      console.log(err.message);
+      console.log(err);
       res.status(500).send("Error in Saving");
     }
   }
