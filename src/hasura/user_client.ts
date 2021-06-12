@@ -178,11 +178,11 @@ export default class UserClient extends HasuraHttpClient {
         return await this.runQuuery(
             `
             mutation changeUserPassword($user_id:String!,$password:Boolean){
-                update_users(where:{user_id:$userd_id},_set:{
+                update_users(where:{user_id:{_eq:$userd_id}},_set:{
                     password:$password
                 }){
                     returning{
-                        affected_rows
+                        user_id
                     }
                 }
             
@@ -191,8 +191,8 @@ export default class UserClient extends HasuraHttpClient {
         ).then(response => response)
             .then(({ update_users }) => update_users)
             .then(({ returning }) => {
-                const { affected_rows } = returning
-                if (affected_rows > 0) {
+                const { user_id } = returning
+                if (user_id) {
                     return true
                 }
                 return Promise.reject("error verifying user")
