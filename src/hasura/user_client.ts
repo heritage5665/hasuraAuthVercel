@@ -177,16 +177,16 @@ export default class UserClient extends HasuraHttpClient {
         }
         return await this.runQuuery(
             `
-            mutation changeUserPassword($user_id:String!,$password:Boolean){
-                update_users(where:{user_id:{_eq:$userd_id}},_set:{
-                    password:$password
-                }){
-                    returning{
-                        user_id
+                mutation changeUserPassword($user_id:String!,$password:Boolean){
+                    update_users(where:{user_id:{_eq:$user_id}},_set:{
+                        password:$password
+                    })
+                    {
+                        returning{
+                            user_id
+                        }
                     }
-                }
-            
-            }
+                 }
             `, { password, user_id }
         ).then(response => response)
             .then(({ update_users }) => update_users)
