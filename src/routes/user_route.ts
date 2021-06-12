@@ -192,29 +192,21 @@ router.post(
   }
 );
 
-
-
 /**
  * @method - POST
  * @param - /request-password-token
  * @description - Forgot Password
  */
-
 router.post("/request-reset-token",
   validateEmail, validateInput,
   async (req: Request, res: Response) => {
     const { email } = req.body;
-    try {
-      return await getUserWithEmail(email, res)
-        .then(async user => await createVerificationTokenFor(user, sgMail, res))
-    } catch (error) {
-      return res.status(400).json({
-        status: false,
-        ...error
-      })
-    }
-  }
-);
+
+    return await getUserWithEmail(email)
+      .then(async user => await createVerificationTokenFor(user, sgMail, res))
+      .catch(error => res.status(400).json({ status: false, ...error })
+      );
+  })
 
 
 /**
@@ -222,7 +214,6 @@ router.post("/request-reset-token",
  * @param - /verify-password-token
  * @description - Forgot Password
  */
-
 router.post("/verify-reset-token",
   validateTokenInput, validateInput, verifyToken,
   async (req: any, res: Response) => {
@@ -251,27 +242,22 @@ router.post("/verify-reset-token",
  * @description - Forgot Password
  */
 router.post("/reset-password",
-  [check("password", "Please enter a valid password").isLength({ min: 8, }).isAlphanumeric().isStrongPassword(),],
-  [verifyToken, validateInput],
+  [check("password", "Please enter a valid password").isLength({ min: 8, }).isAlphanumeric()],
+  verifyToken, validateInput,
   async (req: any, res: Response) => {
-
     const { password } = req.body;
     let user = req.user
     const salt = await bcrypt.genSalt(10)
     user.password = await bcrypt.hash(password, salt)
-    try {
-      await HasuraUser.changePassword(user)
-      return res.status(201).json({
-        status: true,
-        msg: "password reset successfully, you can now login"
-      })
-    } catch (error) {
-      return res.status(400).json({
-        status: false,
-        error: error,
-        msg: "error occured while updating user password"
-      })
-    }
+    return await HasuraUser.changePassword(user).then(() => res.status(201).json({
+      status: true,
+      msg: "password changed successfully, you can now login"
+    })).catch(error => res.status(400).json({
+      status: false,
+      error: error,
+      msg: "error occured by updating user password"
+    }))
+
   }
 );
 
@@ -290,19 +276,14 @@ router.post("/change-password",
     }
     const salt = await bcrypt.genSalt(10)
     user.password = await bcrypt.hash(new_password, salt)
-    try {
-      await HasuraUser.changePassword(user)
-      return res.status(201).json({
-        status: true,
-        msg: "password changed successfully, you can now login"
-      })
-    } catch (error) {
-      return res.status(400).json({
-        status: false,
-        error: error,
-        msg: "error occured by updating user password"
-      })
-    }
+    return await HasuraUser.changePassword(user).then(() => res.status(201).json({
+      status: true,
+      msg: "password changed successfully, you can now login"
+    })).catch(error => res.status(400).json({
+      status: false,
+      error: error,
+      msg: "error occured by updating user password"
+    }))
   }
 );
 

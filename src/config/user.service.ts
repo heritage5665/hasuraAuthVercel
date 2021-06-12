@@ -124,7 +124,7 @@ export function verifyUserToken(user: any, email: string, res: Response) {
 
 }
 
-export async function getUserWithEmail(email: string, res: Response) {
+export async function getUserWithEmail(email: string) {
   return await userDB.findOne(email)
     .then(user => {
       if (!user) return Promise.reject({ msg: "user with  email not found on this server", error: "user not found" })
