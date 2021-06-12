@@ -27,16 +27,18 @@ export default class TokenClient extends HttpClient {
             delete_one_time_pins(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
                 returning{
                     id
+                    user_id
                 }
             }
         }
         `, { user_id, pin }
-    ).then(response => response).then(({ returning }) => {
-        console.log(returning)
-        const { id } = returning
-        if (id) return true
-        return false
-    })
+    ).then(response => response)
+        .then(({ delete_one_time_pins }) => delete_one_time_pins).then(({ returning }) => {
+            console.log(returning)
+            const { id, user_id } = returning
+            if (user_id && id) return true
+            return false
+        })
 
     public save = async (token: HasuraTokenModel) => await this.runQuuery(
         ` 
