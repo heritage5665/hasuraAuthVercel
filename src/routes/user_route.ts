@@ -221,6 +221,7 @@ router.post("/verify-reset-token",
     const { user_id } = req.user
     await validateResetToken(token, user_id)
       .then(async validated => {
+        console.log("found")
         const auth_token = generateAuthToken(req.user)
         return res.status(200).json({
           status: true,

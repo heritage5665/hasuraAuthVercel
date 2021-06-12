@@ -32,6 +32,7 @@ export default class TokenClient extends HttpClient {
         }
         `, { user_id, pin }
     ).then(response => response).then(({ returning }) => {
+        console.log(returning)
         const { id } = returning
         if (id) return true
         return false
