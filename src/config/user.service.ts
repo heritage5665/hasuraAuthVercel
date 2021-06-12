@@ -198,7 +198,7 @@ export const isValidEmail: CustomValidator = async (value: string) => {
   }
 };
 export const validateResetToken = async (token: string, user_id: string) => {
-  const user = await userDB.findUserWithToken(token).
+  return await userDB.findUserWithToken(token).
     then(async user => {
       if (!user) return Promise.reject({ msg: "user with  email not found on this server", error: "user not found" })
       if (user_id != user.user_id) Promise.reject({ msg: "token validation failed", error: "unathorized token" })
