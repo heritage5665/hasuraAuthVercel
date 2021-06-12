@@ -251,14 +251,16 @@ router.post("/reset-password",
     let user = req.user
     const salt = await bcrypt.genSalt(10)
     user.password = await bcrypt.hash(password, salt)
-    return await HasuraUser.changePassword(user).then(() => res.status(201).json({
-      status: true,
-      msg: "password changed successfully, you can now login"
-    })).catch(error => res.status(400).json({
-      status: false,
-      error: error,
-      msg: "error occured by updating user password"
-    }))
+    return await HasuraUser.changePassword(user).
+      then(() => res.status(201).json({
+        status: true,
+        msg: "password changed successfully, you can now login"
+      }))
+      .catch(error => res.status(400).json({
+        status: false,
+        error: error,
+        msg: "error occured by updating user password"
+      }))
 
   }
 );

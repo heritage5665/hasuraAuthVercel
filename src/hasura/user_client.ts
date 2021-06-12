@@ -190,14 +190,7 @@ export default class UserClient extends HasuraHttpClient {
             `, { password, user_id }
         ).then(response => response)
             .then(({ update_users }) => update_users)
-            .then(({ returning }) => {
-                const { user_id } = returning
-                if (user_id) {
-                    return true
-                }
-                return Promise.reject("error verifying user")
-            })
-
+            .catch(errr => Promise.reject(errr))
     }
 
 }
