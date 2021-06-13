@@ -2,8 +2,9 @@ import express, { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import {
-  authenticate, generateOTP, generateRefreshToken, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation, verifyUserAuthToken, basicDetails, validateEmail, createVerificationTokenFor, validateLoginInput, validateTokenInput, validateResetToken
+  authenticate, generateOTP, expiresIn, verifyUserToken,
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation,
+  validateEmail, createVerificationTokenFor, validateLoginInput, validateTokenInput, validateResetToken
 } from "../config/user.service.js";
 import sgMail from "@sendgrid/mail";
 import { v4 as uuidv4 } from 'uuid';

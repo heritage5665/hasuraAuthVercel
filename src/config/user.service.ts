@@ -75,7 +75,7 @@ export function expiresIn(minutes: any) {
 }
 
 
-export function generateAuthToken(user: any, expires_in: number = 60) {
+export function generateAuthToken(user: any, expires_in: number = 24 * 60) {
   const { user_id, email } = user
   const expires = expiresIn(expires_in)
   let token = user_id + "::" + expires.getTime() + "::" + email
@@ -105,7 +105,6 @@ export function verifyUserToken(user: any, email: string, res: Response) {
       type: "not-verified",
       msg: "We were unable to find a valid token. Your token may have expired.",
     });
-
   }
   if (user.email != email) {
     return res.status(400).send({
