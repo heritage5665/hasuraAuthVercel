@@ -3,6 +3,7 @@ import express from "express";
 import router from "./routes/user_route.js";
 // import { verifyToken } from "./utils/validate-token.js";
 import { AuthWebHook } from "./utils/web-hook-auth.js";
+import sgMail from "@sendgrid/mail";
 
 
 const { json } = pkg
@@ -17,6 +18,7 @@ app.use("/user", router);
 
 // PORT
 const PORT = process.env.PORT || 4000;
+sgMail.setApiKey("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");
 
 app.listen(PORT, () => {
   console.log(`Server Started at PORT ${PORT}`);

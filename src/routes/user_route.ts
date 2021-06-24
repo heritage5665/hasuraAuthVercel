@@ -1,22 +1,26 @@
 import express, { NextFunction, Request, Response } from "express";
-import { check, validationResult } from "express-validator";
+import { check } from "express-validator";
 import bcrypt from "bcrypt";
+
 import {
   authenticate, generateOTP, expiresIn, verifyUserToken,
-  getUserWithEmail, generateAuthToken, validateInput, signupValidation, VerifyEmailvalidation,
-  validateEmail, createVerificationTokenFor, validateLoginInput, validateTokenInput, validateResetToken
+  getUserWithEmail, generateAuthToken, validateInput, signupValidation,
+  VerifyEmailvalidation, validateEmail, createVerificationTokenFor,
+  validateLoginInput, validateTokenInput, validateResetToken, sendMail,
+  successMessage, validateUserIsLogin, errorMessage, assertNotVerified, validateUserEmail
 } from "../config/user.service.js";
-import sgMail from "@sendgrid/mail";
+
+
 import { v4 as uuidv4 } from 'uuid';
 import UserClient from '../hasura/user_client.js';
-import TokenClient from '../hasura/token_client.js'
+// import TokenClient from '../hasura/token_client.js'
 import { verifyToken } from '../utils/validate-token.js';
-sgMail.setApiKey("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");
+// sgMail.setApiKey("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");
 
 const router = express.Router();
 
 const HasuraUser: UserClient = UserClient.getInstance()
-const HasuraToken: TokenClient = TokenClient.getInstance()
+// const HasuraToken: TokenClient = TokenClient.getInstance()
 /**
  * @method - POST
  * @param - /signup
@@ -31,35 +35,25 @@ router.post(
     const user_type: string = "user"
     const user_id: string = uuidv4()
     const isVerified = false
-    try {
-      const salt = await bcrypt.genSalt(10);
-      password = await bcrypt.hash(password, salt);
-      const pin = generateOTP(7)
-      const expires = expiresIn(60 * 24)
-      const user = await HasuraUser.save({
-        email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
-      });
 
-      const content = {
-        to: email,
-        from: "support@me.com",
-        subject: "Email Verification",
-        html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
-      };
-      await sgMail.send(content);
-      return res
-        .json({
-          data: { user: { ...user }, auth_token: generateAuthToken(user), pin },
-          message: "Please check your email for verification code",
-        })
-        .status(201);
-    } catch (err) {
-      // console.log(err);
-      res.status(500).json({
-        status: false,
-        msg: err
-      });
-    }
+    const salt = await bcrypt.genSalt(10);
+    password = await bcrypt.hash(password, salt);
+    const pin = generateOTP(7)
+    const expires = expiresIn(60 * 24)
+    const user = await HasuraUser.save({
+      email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
+    });
+    await sendMail({
+      to: email,
+      from: "support@me.com",
+      subject: "Email Verification",
+      html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
+    })
+    return successMessage({
+      data: { user: { ...user }, auth_token: generateAuthToken(user), pin },
+      message: "Please check your email for verification code",
+    }, res, 201)
+
   }
 );
 
@@ -69,38 +63,22 @@ router.post(
  * @description - Create token after signup
  */
 router.post("/resend-token",
-  validateEmail,
-  verifyToken,
+  validateEmail, verifyToken, validateUserIsLogin,
   async (req: any, res: Response, next: NextFunction) => {
-    if (!req.user || req.user == undefined || req.user == null) {
-      return res.status(400).json({
-        status: false,
-        error: "validation error",
-        msg: "authorization token required"
-      })
-    }
-    try {
-      const user = req.user
-      const { email } = req.body
-      if (user.email != email) {
-        return res.status(401).json({
-          status: false,
-          error: "unauthorized user",
-          msg: "invalid email given"
+    await validateUserEmail(req)
+      .catch(error => errorMessage(error, res, 401))
+    const user = req.user
+    return await createVerificationTokenFor(user)
+      .then(async ({ pin }) =>
+        res.status(201).json({
+          status: true,
+          msg: "token created successfully, please check your email",
+          data: { token: pin, auth_token: generateAuthToken(user, 7) }
         })
-      }
-      return await createVerificationTokenFor(user, sgMail, res)
-    } catch (error) {
-      return res.status(200).json({
-        status: false,
-        error
-      })
-    }
-
+      )
+      .catch(error => errorMessage({ msg: error, error: "something went error" }, res, 200))
   }
-
 )
-
 
 /**
  * @method - POST
@@ -110,26 +88,21 @@ router.post("/resend-token",
 router.post("/create-token",
   validateEmail,
   async (req: any, res: Response, next: NextFunction) => {
-    try {
-      const { email } = req.body
-      const user = await HasuraUser.findOne(email)
-        .then(user => {
-          if (!user) return Promise.reject("user with email not found")
-          if (user.isVerified) return Promise.reject("user already verified")
-          return user
-        })
-      return await createVerificationTokenFor(user, sgMail, res)
-
-    } catch (error) {
-      return res.status(200).json({
-        status: false,
-        error
+    const { email } = req.body
+    await assertNotVerified(await HasuraUser.findOne(email))
+      .then(async (user) => await createVerificationTokenFor(user)
+        .then(async ({ pin }) =>
+          res.status(201).json({
+            status: true,
+            msg: "token created successfully, please check your email",
+            data: { token: pin, auth_token: generateAuthToken(user, 7) }
+          })
+        ))
+      .catch(err => {
+        const { msg, error, status_code } = err
+        return errorMessage({ msg, error }, res, status_code)
       })
-    }
-
-  }
-
-)
+  })
 
 /**
  * @method - POST
@@ -138,8 +111,7 @@ router.post("/create-token",
  */
 router.post(
   "/verify-token",
-  VerifyEmailvalidation,
-  validateInput,
+  VerifyEmailvalidation, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, token } = req.body
@@ -147,16 +119,13 @@ router.post(
       const user = await HasuraUser.findUserWithToken(token);
       const canBeVerify = verifyUserToken(user, email, res);
       if (canBeVerify != true) return canBeVerify;
-      await HasuraUser.verifyUser(user)
-        .then(verified => {
-          if (verified) {
-            return res.status(200).send({
-              status: true,
-              msg: "user verified.",
-            })
-          }
-
+      const verified = await HasuraUser.verifyUser(user)
+      if (verified) {
+        return res.status(200).send({
+          status: true,
+          msg: "user verified.",
         })
+      }
 
     } catch (error) {
       return res.status(401).json({
@@ -165,8 +134,6 @@ router.post(
         msg: "invalid or expired token"
       })
     }
-
-
 
   }
 );
@@ -202,9 +169,15 @@ router.post("/request-reset-token",
   validateEmail, validateInput,
   async (req: Request, res: Response) => {
     const { email } = req.body;
-
     return await getUserWithEmail(email)
-      .then(async user => await createVerificationTokenFor(user, sgMail, res))
+      .then(async user => { return { pin: await createVerificationTokenFor(user), user } })
+      .then(async ({ pin, user }) =>
+        res.status(201).json({
+          status: true,
+          msg: "token created successfully, please check your email",
+          data: { token: pin, auth_token: generateAuthToken(user, 7) }
+        })
+      )
       .catch(error => res.status(400).json({ status: false, ...error })
       );
   })

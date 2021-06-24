@@ -49,7 +49,9 @@ export default class UserClient extends HasuraHttpClient {
                 }
             }
         `, { key }
-    ).then((response) => response).then(({ users }) => users[0])
+    ).then((response) => response)
+        .then(({ users }) => users[0])
+
 
     public findUserByEmail = async (email: string) => await this.runQuuery(
         `query GetUser($email:String!,$isVerified:Boolean!) {

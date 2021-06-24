@@ -1,3 +1,4 @@
+
 // import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -7,6 +8,8 @@ import TokenClient from '../hasura/token_client.js';
 import { CustomValidator } from "express-validator";
 import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
+import sgMail from "@sendgrid/mail";
+import { constants } from "buffer";
 interface Authenticate {
   email: string;
   password: string;
@@ -16,6 +19,47 @@ const tokenDB = TokenClient.getInstance()
 interface Token {
   token: string;
 }
+interface MailContent {
+  from: string;
+  to: string;
+  subject: string;
+  html: string
+}
+interface SuccessResponse {
+  message: string
+  data: any
+}
+
+interface ErrorResponse {
+  msg: any
+  error: string
+}
+export const successMessage = (response_data: SuccessResponse, res: Response, status_code: number) => res
+  .json({ ...response_data, status: true }).status(status_code)
+
+
+export const errorMessage = (error_data: ErrorResponse, res: Response, status_code: number) => res
+  .json({ ...error_data, status: false }).status(status_code)
+
+export const validateUserIsLogin = async (req: any, res: Response, next: NextFunction) => {
+  if (!req.user || req.user == undefined || req.user == null) {
+    return res.status(400).json({
+      status: false,
+      error: "validation error",
+      msg: "authorization token required"
+    })
+  }
+  return next();
+}
+
+export const assertNotVerified = async (userQueryResponse: Promise<any>) => {
+  return userQueryResponse.then(user => {
+    if (!user) return Promise.reject({ error: "user with email not found", msg: "not found", status_code: 404 })
+    if (user.isVerified) return Promise.reject({ error: "user already verified", msg: "already verified", status_code: 409 })
+    return user
+  })
+}
+
 export const validateInput = async (req: any, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -67,6 +111,11 @@ export function decrypt(text: string) {
   let decrypted = decipher.update(encryptedText);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
+}
+export async function sendMail(content: MailContent) {
+  return await sgMail.send(content)
+    .then(response => console.log(response))
+    .catch(error => console.log(error));
 }
 
 export function expiresIn(minutes: any) {
@@ -196,6 +245,15 @@ export const isValidEmail: CustomValidator = async (value: string) => {
     return Promise.reject("E-mail already in use");
   }
 };
+export const validateUserEmail = async (req: any) => {
+  const { email } = req.body
+  if (req.user.email != email) {
+    Promise.reject({
+      error: "unauthorized user",
+      msg: "invalid email given"
+    })
+  }
+}
 export const validateResetToken = async (token: string, user_id: string) => {
   return await userDB.findUserWithToken(token).
     then(async user => {
@@ -205,23 +263,19 @@ export const validateResetToken = async (token: string, user_id: string) => {
     })
 
 }
-export const createVerificationTokenFor = async (user: any, sgMail: any, res: Response) => {
+export const createVerificationTokenFor = async (user: any) => {
   const { pin } = await generateRefreshToken(user)
-  const content = {
+
+  await sendMail({
     to: user.email,
     from: "support@me.com",
     subject: "Email Verification",
     html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
-  };
-  await sgMail.send(content);
-  const seve_minutes = 7
-  const auth_token = generateAuthToken(user, seve_minutes)
-  return res.status(201).json({
-    status: true,
-    msg: "token created successfully, please check your email",
-    data: { token: pin, auth_token }
   })
+  return pin
 }
+
+
 
 export const isValidPhoneNumber: CustomValidator = async (value: string) => {
   const user = await userDB.findOne(value);
