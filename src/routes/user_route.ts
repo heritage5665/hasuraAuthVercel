@@ -45,7 +45,7 @@ router.post(
     });
     await sendMail({
       to: email,
-      from: "support@me.com",
+      from: "support@convoy.com",
       subject: "Email Verification",
       html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
     })

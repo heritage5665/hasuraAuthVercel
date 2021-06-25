@@ -273,7 +273,7 @@ export const createVerificationTokenFor = async (user: any) => {
 
   await sendMail({
     to: user.email,
-    from: "support@me.com",
+    from: "support@convoy.com",
     subject: "Email Verification",
     html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
   })
