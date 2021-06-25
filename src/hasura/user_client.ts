@@ -104,11 +104,11 @@ export default class UserClient extends HasuraHttpClient {
                 }
         `, { ...user }
     ).then(response => {
-        console.log(response)
+        // console.log(response)
         return response
     })
         .then(({ insert_users_one }) => {
-            console.log(insert_users_one)
+            // console.log(insert_users_one)
             return insert_users_one
         })
 
@@ -161,7 +161,8 @@ export default class UserClient extends HasuraHttpClient {
             
             }
             `, { isVerified, user_id }
-        ).then(response => response)
+        )
+            .then(response => response)
             .then(({ update_users }) => update_users)
             .then(({ returning }) => {
                 const { user_id } = returning

@@ -9,7 +9,7 @@ import { CustomValidator } from "express-validator";
 import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
 import sgMail from "@sendgrid/mail";
-import { constants } from "buffer";
+// import { constants } from "buffer";
 interface Authenticate {
   email: string;
   password: string;
@@ -115,7 +115,7 @@ export function decrypt(text: string) {
 export async function sendMail(content: MailContent) {
   return await sgMail.send(content)
     .then(response => console.log(response))
-    .catch(error => console.log(error));
+    .catch(error => console.log("mail error", error));
 }
 
 export function expiresIn(minutes: any) {
@@ -218,27 +218,6 @@ export async function authenticate({ email, password }: Authenticate, user: any)
   };
 }
 // needs complete rewrite
-// export async function refreshToken({ token }: Token) {
-//   const refreshToken = await getRefreshToken(token);
-//   const { user } = refreshToken;
-
-//   // replace old refresh token with a new one and save
-//   const newRefreshToken = generateRefreshToken(user);
-//   refreshToken.revoked = Date.now();
-//   refreshToken.replacedByToken = newRefreshToken.token;
-//   await refreshToken.save();
-//   await newRefreshToken.save();
-
-//   // generate new jwt
-//   const jwtToken = generateJwtToken(user);
-
-//   // return basic details and tokens
-//   return {
-//     ...basicDetails(user),
-//     jwtToken,
-//     refreshToken: newRefreshToken.token,
-//   };
-// }
 export const isValidEmail: CustomValidator = async (value: string) => {
   const user = await userDB.findOne(value);
   if (user) {
@@ -347,5 +326,5 @@ export const validateLoginInput = [
   })
 ]
 
-export const validateTokenInput = [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7 })]
+export const validateTokenInput = [check("token", "Please enter a valid token").isNumeric().isLength({ min: 7, max: 7 })]
 

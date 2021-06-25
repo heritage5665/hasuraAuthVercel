@@ -13,12 +13,9 @@ app.use(json());
 app.post("/web-auth", AuthWebHook)
 app.use("/user", router);
 
-// this route is protected with token
-// app.use("/api/dashboard", verifyToken, dashboardRoutes);
-
 // PORT
 const PORT = process.env.PORT || 4000;
-sgMail.setApiKey("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");
+sgMail.setApiKey("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");
 
 app.listen(PORT, () => {
   console.log(`Server Started at PORT ${PORT}`);
