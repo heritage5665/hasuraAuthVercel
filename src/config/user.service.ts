@@ -39,7 +39,7 @@ interface ErrorResponse {
 
 const createTestAccount = async () => await nodemailer.createTestAccount();
 
-async function sendMailUsingSmtp(content: any) {
+async function sendMailUsingSmtp(content: MailContent) {
   const testAccount = await createTestAccount()
   let transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
