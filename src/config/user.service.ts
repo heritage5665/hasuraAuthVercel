@@ -9,6 +9,8 @@ import { CustomValidator } from "express-validator";
 import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
 import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
+
 // import { constants } from "buffer";
 interface Authenticate {
   email: string;
@@ -34,6 +36,27 @@ interface ErrorResponse {
   msg: any
   error: string
 }
+
+const createTestAccount = async () => await nodemailer.createTestAccount();
+
+async function sendMailUsingSmtp(content: any) {
+  const testAccount = await createTestAccount()
+  let transporter = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
+    },
+  });
+
+  // send mail with defined transport object
+  return await transporter.sendMail(content);
+
+
+}
+
 export const successMessage = (response_data: SuccessResponse, res: Response, status_code: number) => res
   .json({ ...response_data, status: true }).status(status_code)
 
@@ -113,9 +136,12 @@ export function decrypt(text: string) {
   return decrypted.toString();
 }
 export async function sendMail(content: MailContent) {
-  return await sgMail.send(content)
-    .then(response => console.log(response))
-    .catch(error => console.log("mail error", error));
+  await sendMailUsingSmtp(content).
+    then(info => console.log(info.messageId))
+  await sgMail.send(content)
+    .then(response => console.log("response", response))
+    .catch(error => console.log("mail error", error))
+  return true
 }
 
 export function expiresIn(minutes: any) {
