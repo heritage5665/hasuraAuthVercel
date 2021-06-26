@@ -148,6 +148,12 @@ router.post(
   validateLoginInput, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await HasuraUser.findOne(req.body.email);
+    if (user == undefined) {
+      return errorMessage({
+        error: "not found",
+        msg: "Email/Password incorrect",
+      }, res, 404)
+    }
     if (!user.isVerified)
       return res.status(401).send({
         type: "not-verified",
