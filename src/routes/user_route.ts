@@ -147,22 +147,11 @@ router.post(
   "/login",
   validateLoginInput, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await HasuraUser.findOne(req.body.email);
-    if (user == undefined) {
-      return errorMessage({
-        error: "not found",
-        msg: "Email/Password incorrect",
-      }, res, 404)
-    }
-    if (!user.isVerified)
-      return res.status(401).send({
-        type: "not-verified",
-        msg: "Your account has not been verified.",
-      });
     const { email, password } = req.body;
-    return await authenticate({ email, password }, user)
+    return await getUserWithEmail(email)
+      .then(async user => await authenticate({ email, password }, user))
       .then(resp => res.status(200).json(resp))
-      .catch(error => res.status(200).json({ error }));
+      .catch(error => res.status(401).json({ error }));
   }
 );
 
