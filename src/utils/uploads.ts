@@ -34,7 +34,8 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
         })
 
     } catch (err) {
-        return res.status(500).json(err)
+        console.log(err)
+        return res.status(5).json(err)
     }
 
 
