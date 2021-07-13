@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { v2 as cloudinary } from "cloudinary";
 import DatauriParser from 'datauri/parser.js';
+
 import path from 'path';
 
 const getFileFromBuffer = (req: any): string => {
@@ -21,7 +22,7 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
     }
 
     const file_mimetype = req.file.mimetype
-    const file = req.file.originalname;
+    const file = getFileFromBuffer(req);
     // console.log(file)
 
 
@@ -29,7 +30,7 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
         if (["image/jpeg", "image/png", "image/gif", "image/avif"].includes(file_mimetype)) {
             const res = await cloudinary.uploader.upload(file, {
                 tags: 'convoy_uploads',
-                resource_type: "image",
+                // resource_type: "image",
                 // public_id: "convoy/auth/images/"
             })
         }
