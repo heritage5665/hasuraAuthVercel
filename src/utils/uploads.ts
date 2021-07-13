@@ -1,6 +1,15 @@
 import { Response, NextFunction } from "express";
 import { v2 as cloudinary } from "cloudinary";
-import getFileFromBuffer from "./multer";
+import DatauriParser from 'datauri/parser';
+import path from 'path';
+
+const getFileFromBuffer = (req: any): string => {
+    const file = new DatauriParser().format(path.extname(req.file.originalname).toString(), req.file.buffer)?.content
+    if (file == undefined) {
+        throw new Error("no file given")
+    }
+    return file
+};
 
 
 
