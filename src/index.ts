@@ -5,16 +5,15 @@ import { AuthWebHook } from "./utils/web-hook-auth.js";
 import sgMail from "@sendgrid/mail";
 import { verifyToken } from "./utils/validate-token.js";
 import { UploadToCloudinary } from "./utils/uploads.js";
-import fileUpload from "express-fileupload";
+import { multerUploads } from "./utils/multer.js";
 const { json } = pkg
 import { v2 as cloudinary } from "cloudinary";
 const app = express();
 app.use(json());
-app.use(fileUpload({
-  limits: { fileSize: 50 * 1024 * 1024 },
-}))
+
+
 app.post("/web-auth", AuthWebHook)
-app.post("/upload", verifyToken, UploadToCloudinary)
+app.post("/upload", multerUploads, verifyToken, UploadToCloudinary)
 app.use("/user", router);
 
 // PORT
