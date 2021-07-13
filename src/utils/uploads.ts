@@ -17,11 +17,12 @@ const getFileFromBuffer = (req: any): string => {
 export const UploadToCloudinary = async (req: any, res: Response, next: NextFunction) => {
 
     if (!req.file) {
-        return res.status(400).send('No files were uploaded.');
+        return res.status(400).json({ error: 'No files were uploaded.' });
     }
 
     const file_mimetype = req.file.mimetype
     const file = getFileFromBuffer(req);
+    console.log(file)
 
 
     try {
