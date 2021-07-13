@@ -10,7 +10,9 @@ const { json } = pkg
 import { v2 as cloudinary } from "cloudinary";
 const app = express();
 app.use(json());
-app.use(fileUpload())
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}))
 app.post("/web-auth", AuthWebHook)
 app.post("/upload", verifyToken, UploadToCloudinary)
 app.use("/user", router);
