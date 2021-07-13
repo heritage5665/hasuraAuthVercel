@@ -16,7 +16,7 @@ const getFileFromBuffer = (req: any): string => {
 // middleware to validate token
 export const UploadToCloudinary = async (req: any, res: Response, next: NextFunction) => {
 
-    if (!req.files || Object.keys(req.files).length === 0) {
+    if (!req.file) {
         return res.status(400).send('No files were uploaded.');
     }
 
