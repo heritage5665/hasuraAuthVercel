@@ -18,18 +18,13 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
     if (!req.file) {
         return res.status(400).json({ error: 'No files were uploaded.' });
     }
-
     const mimetype = req.file.mimetype
+    let result;
     if (["audio/mp3", "audio/mp4", "video/3gp", "video/mp4"].includes(mimetype)) {
-        const res = uploadMan.upload("video", req.file)
+        result = await uploadMan.upload("video", req.file)
     } else {
-        const res = uploadMan.upload("image", req.file)
+        result = await uploadMan.upload("image", req.file)
     }
-    return res.status(201).json(res)
-
-
-
-
-
+    return res.status(201).json(result)
 
 };
