@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { v2 as cloudinary } from "cloudinary";
-import DatauriParser from 'datauri/parser';
+import DatauriParser from 'datauri/parser.js';
 import path from 'path';
 
 const getFileFromBuffer = (req: any): string => {
