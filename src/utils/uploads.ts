@@ -37,15 +37,15 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
         if (["audio/mp4", "audio/mp3", "video/3gp", "video/mp4", "video/quicktime"].includes(file_mimetype)) {
             const res = await cloudinary.uploader.upload_large(file, {
                 tags: 'convoy_uploads',
-                resource_type: "video",
+                // resource_type: "video",
                 // public_id: "convoy/uploads/videos/"
             })
         }
 
         const res = await cloudinary.uploader.upload(file, {
             tags: 'convoy_uploads',
-            resource_type: "image",
-            public_id: "convoy/upload/others"
+            resource_type: "auto",
+            // public_id: "convoy/upload/others"
         })
 
         return res.status(201).json({ data: res })
