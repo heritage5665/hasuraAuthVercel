@@ -1,19 +1,22 @@
 import pkg from "body-parser";
 import express from "express";
 import router from "./routes/user_route.js";
+import multer from 'multer';
 import { AuthWebHook } from "./utils/web-hook-auth.js";
 import sgMail from "@sendgrid/mail";
 import { verifyToken } from "./utils/validate-token.js";
 import { UploadToCloudinary } from "./utils/uploads.js";
-import { multerUploads } from "./utils/multer.js";
+
 const { json } = pkg
 import { v2 as cloudinary } from "cloudinary";
+
 const app = express();
 app.use(json());
 
 
 app.post("/web-auth", AuthWebHook)
-app.post("/upload", multerUploads, verifyToken, UploadToCloudinary)
+const storage = multer.memoryStorage();
+app.post("/upload", multer({ storage }).single('media'), verifyToken, UploadToCloudinary)
 app.use("/user", router);
 
 // PORT
