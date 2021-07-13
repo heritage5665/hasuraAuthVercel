@@ -21,7 +21,7 @@ export const UploadToCloudinary = async (req: any, res: Response, next: NextFunc
     }
 
     const file_mimetype = req.file.mimetype
-    const file = getFileFromBuffer(req);
+    const file = path.extname(req.file.originalname).toString();
     // console.log(file)
 
 
