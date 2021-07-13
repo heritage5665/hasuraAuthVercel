@@ -12,4 +12,4 @@ const getFileFromBuffer = (req: any): string => {
     }
     return file
 };
-export { getFileFromBuffer };
+export default getFileFromBuffer;

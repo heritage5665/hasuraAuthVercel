@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { v2 as cloudinary } from "cloudinary";
-import { getFileFromBuffer } from "./multer";
+import getFileFromBuffer from "./multer";
 
 
 
