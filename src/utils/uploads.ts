@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import DatauriParser from 'datauri/parser.js';
 
-import { UploadHttpClient } from "../hasura/client";
+import { UploadHttpClient } from "../hasura/client.js";
 
 import path from 'path';
 
