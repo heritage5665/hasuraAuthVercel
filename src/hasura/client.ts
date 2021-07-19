@@ -42,7 +42,8 @@ export default abstract class HasuraHttpClient extends HttpClient {
         super({
             baseURL: 'https://convey-core.herokuapp.com/v1/graphql',
             headers: {
-                "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv"
+                "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv",
+                "Content-Type": "multipart/form-data"
             }
         })
 
@@ -62,7 +63,7 @@ export class UploadHttpClient extends HttpClient {
             baseURL: 'https://agile-falls-17062.herokuapp.com/upload',
             headers: {
                 'Content-Type': "multipart/form-data;",
-                "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv"
+                // "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv"
             }
         })
 
@@ -71,7 +72,6 @@ export class UploadHttpClient extends HttpClient {
         return this.instance.post('/' + file_type, {
             media: file
         })
-
     }
 
 }
