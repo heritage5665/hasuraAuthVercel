@@ -10,6 +10,7 @@ import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
+import { ONE_TIME_PASSWORD_TOKEN_LENGTH } from "./settings.js";
 
 // import { constants } from "buffer";
 interface Authenticate {
@@ -212,7 +213,7 @@ export function generateRefreshToken(user: any) {
   // create a refresh token that expires in 7 days
   return tokenDB.save({
     user_id: user.user_id,
-    pin: generateOTP(7),
+    pin: generateOTP(ONE_TIME_PASSWORD_TOKEN_LENGTH),
     expires: expiresIn(7)
   });
 }

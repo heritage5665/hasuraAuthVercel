@@ -1,6 +1,7 @@
 import pkg from "body-parser";
 import express from "express";
 import router from "./routes/user_route.js";
+import price_router from "./routes/price_recommedation.js";
 import multer from 'multer';
 import { AuthWebHook } from "./utils/web-hook-auth.js";
 import sgMail from "@sendgrid/mail";
@@ -15,6 +16,7 @@ app.use(json());
 
 
 app.post("/web-auth", AuthWebHook)
+app.use("price", price_router);
 const storage = multer.memoryStorage();
 app.post("/upload", multer({ storage }).single('media'), verifyToken, UploadToCloudinary)
 app.use("/user", router);

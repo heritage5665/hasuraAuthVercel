@@ -15,7 +15,7 @@ export default class UserClient extends HasuraHttpClient {
         return this.classInstance
     }
 
-    public getUsers = async () => await this.runQuuery(
+    public getUsers = async () => await this.execute(
         `
          query GetAllUsers {
             users {
@@ -30,7 +30,7 @@ export default class UserClient extends HasuraHttpClient {
         }
         `, {})
 
-    public findOne = async (key: string) => await this.runQuuery(
+    public findOne = async (key: string) => await this.execute(
         `
              query GetUserByKey($key:String!) {
                 users(where:{
@@ -53,7 +53,7 @@ export default class UserClient extends HasuraHttpClient {
         .then(({ users }) => users[0])
 
 
-    public findUserByEmail = async (email: string) => await this.runQuuery(
+    public findUserByEmail = async (email: string) => await this.execute(
         `query GetUser($email:String!,$isVerified:Boolean!) {
                 users(where:{
                     _and: [
@@ -71,7 +71,7 @@ export default class UserClient extends HasuraHttpClient {
         `, { "email": email, "isVerified": true }
     ).then(response => response).then(({ users }) => users[0])
 
-    public save = async (user: User) => await this.runQuuery(
+    public save = async (user: User) => await this.execute(
         ` 
             mutation CreateUserOne($user_id: String!,$fullname:String!,$email:String!,
                 $password:String!,$isVerified:Boolean!,$phone:String,
@@ -104,17 +104,15 @@ export default class UserClient extends HasuraHttpClient {
                 }
         `, { ...user }
     ).then(response => {
-        // console.log(response)
         return response
     })
         .then(({ insert_users_one }) => {
-            // console.log(insert_users_one)
             return insert_users_one
         })
 
     public findUserWithToken = async (pin: string) => {
 
-        return await this.runQuuery(
+        return await this.execute(
             `
             query FindUserWithToken($pin:String!){
                 one_time_pins(where:{pin:{_eq:$pin}},limit:1,order_by:{expires:desc}){
@@ -148,7 +146,7 @@ export default class UserClient extends HasuraHttpClient {
     public verifyUser = async (user: any) => {
         const isVerified = true
         const { user_id } = user
-        return await this.runQuuery(
+        return await this.execute(
             `
             mutation VerifyUser($user_id:String!,$isVerified:Boolean!){
                 update_users(where:{user_id:{_eq:$user_id}},_set:{
@@ -178,7 +176,7 @@ export default class UserClient extends HasuraHttpClient {
         if (!(password && user_id)) {
             return Promise.reject("user_id and password is  required")
         }
-        return await this.runQuuery(
+        return await this.execute(
             `
                 mutation changeUserPassword($user_id:String!,$password:String!){
                     update_users(where:{user_id:{_eq:$user_id}},_set:{

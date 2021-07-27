@@ -81,7 +81,7 @@ router.post("/resend-token",
 )
 
 /**
- * @method - POST
+ * @method  POST
  * @param - /create-token
  * @description - Create token after signup
  */
@@ -105,7 +105,7 @@ router.post("/create-token",
   })
 
 /**
- * @method - POST
+ * @method  POST
  * @param - /verify-token
  * @description - Verify Signup Token
  */

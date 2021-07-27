@@ -1,4 +1,6 @@
-import { response } from "express";
+
+
+
 import HttpClient from "./client.js";
 
 interface HasuraTokenModel {
@@ -21,9 +23,9 @@ export default class TokenClient extends HttpClient {
         return this.classInstance
     }
 
-    public delete = async (user_id: string, pin: string) => await this.runQuuery(
+    public delete = async (user_id: string, pin: string) => await this.execute(
         `   
-        mutation CreateUserOne($user_id: String!,$pin:String!) {
+        mutation($user_id: String!,$pin:String!) {
             delete_one_time_pins(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
                 returning{
                     id
@@ -40,9 +42,9 @@ export default class TokenClient extends HttpClient {
             return false
         })
 
-    public save = async (token: HasuraTokenModel) => await this.runQuuery(
+    public save = async (token: HasuraTokenModel) => await this.execute(
         ` 
-        mutation CreateUserOne($user_id: String!,$pin:String!,$expires:timestamp) {
+        mutation($user_id: String!,$pin:String!,$expires:timestamp) {
             delete_one_time_pins(where:{user_id:{_eq:$user_id}}){
                 returning{
                     id

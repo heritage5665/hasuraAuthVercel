@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { HASURA_GRAPHQL_ENGINE_BASE_URL, HASURA_ADMIN_SECRET } from "../config/settings.js"
 // import HasuraHeader from "./types/User"
 
 declare module 'axios' {
@@ -40,15 +41,15 @@ export default abstract class HasuraHttpClient extends HttpClient {
 
     constructor() {
         super({
-            baseURL: 'https://convey-core.herokuapp.com/v1/graphql',
+            baseURL: HASURA_GRAPHQL_ENGINE_BASE_URL,
             headers: {
-                "X-Hasura-Admin-Secret": "uAi8w7bI0h40Dmgxl2PvOooaEI1DeNoPtdYn93TjgmJKraHjT3aseuQHOy3aZGCv",
-                "Content-Type": "multipart/form-data"
+                "X-Hasura-Admin-Secret": HASURA_ADMIN_SECRET,
+                // "Content-Type": "multipart/form-data"
             }
         })
 
     }
-    public runQuuery = (query: string, variables: object) => this.instance.post("", {
+    public execute = (query: string, variables: object) => this.instance.post("", {
         "variables": variables,
         "query": query
     });
