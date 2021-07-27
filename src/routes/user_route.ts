@@ -13,10 +13,8 @@ import {
 
 import { v4 as uuidv4 } from 'uuid';
 import UserClient from '../hasura/user_client.js';
-// import TokenClient from '../hasura/token_client.js'
 import { verifyToken } from '../utils/validate-token.js';
-// sgMail.setApiKey("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");
-
+import { ONE_TIME_PASSWORD_TOKEN_LENGTH, TOKEN_EXPIRED_IN, MAIL_FROM } from "../config/settings.js";
 const router = express.Router();
 
 const HasuraUser: UserClient = UserClient.getInstance()
@@ -38,14 +36,14 @@ router.post(
 
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt);
-    const pin = generateOTP(7)
-    const expires = expiresIn(60 * 24)
+    const pin = generateOTP(ONE_TIME_PASSWORD_TOKEN_LENGTH)
+    const expires = expiresIn(TOKEN_EXPIRED_IN)
     const user = await HasuraUser.save({
       email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
     });
     await sendMail({
       to: email,
-      from: "support@convoy.com",
+      from: MAIL_FROM,
       subject: "Email Verification",
       html: `<body> <p> Your One Time Password is ${pin}></p></body>`,
     })

@@ -19,9 +19,9 @@ interface Authenticate {
 }
 const userDB = UserClient.getInstance()
 const tokenDB = TokenClient.getInstance()
-interface Token {
-  token: string;
-}
+// interface Token {
+//   token: string;
+// }
 interface MailContent {
   from: string;
   to: string;
