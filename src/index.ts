@@ -7,7 +7,7 @@ import { AuthWebHook } from "./utils/web-hook-auth.js";
 import sgMail from "@sendgrid/mail";
 import { verifyToken } from "./utils/validate-token.js";
 import { UploadToCloudinary } from "./utils/uploads.js";
-
+import { SENDGRID_KEY } from "./config/settings.js";
 const { json } = pkg
 import { v2 as cloudinary } from "cloudinary";
 
@@ -23,7 +23,7 @@ app.use("/user", router);
 
 // PORT
 const PORT = process.env.PORT || 4000;
-sgMail.setApiKey("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");
+sgMail.setApiKey(SENDGRID_KEY);
 cloudinary.config({
   cloud_name: 'techbird',
   api_key: "456833922673438",

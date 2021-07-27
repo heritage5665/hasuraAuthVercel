@@ -241,7 +241,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
   return {
     ...basicDetails(user),
     authToken,
-    refreshToken: refreshToken.pin,
+    // refreshToken: refreshToken.pin,
   };
 }
 // needs complete rewrite
