@@ -23,6 +23,9 @@ import streamifier from 'streamifier'
 
 export const UploadToCloudinary = async function (req: any, res: Response, next: NextFunction) {
     let streamUpload = (req: any) => {
+        if (req.file == undefined) {
+            return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
+        }
         return new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
                 (error, result) => {
