@@ -41,6 +41,7 @@ router.post(
     const user = await HasuraUser.save({
       email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
     });
+    // might needs to move this to another endpoint to be trigger by hasura event
     await sendMail({
       to: email,
       from: MAIL_FROM,
