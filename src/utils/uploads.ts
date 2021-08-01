@@ -56,7 +56,7 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     const mimetype: string = req.file.mimetype
     const is_image = mimetype.split("/")[0] == "image"
     const is_video_or_audio = mimetype.split("/")[0] == "audio" || mimetype.split("/")[0] == "video"
-    console.log(mimetype)
+
     let result
     try {
         // if (images_regex.exec(req.file.path)) {
@@ -67,6 +67,7 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
         if (is_video_or_audio) {
             result = await upload_video(req).catch(error => res.status(400).json(error))
         } else {
+            console.error(mimetype)
             return res.status(400).json({ "msg": "invalid image, audio or video given", 'error': 'Bad Request' })
         }
 
