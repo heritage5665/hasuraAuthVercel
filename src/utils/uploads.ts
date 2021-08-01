@@ -28,7 +28,7 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
     let resource_type = "image";
     if (!images_regex.exec(req.file.path)) {
-        resource_type = "vidoe"
+        resource_type = "video"
     }
 
     const streamUpload = (req: any) => {
