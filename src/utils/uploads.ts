@@ -1,7 +1,5 @@
 import { Response, NextFunction } from "express";
 // import DatauriParser from 'datauri/parser.js';
-
-import { UploadHttpClient } from "../hasura/client.js";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from 'streamifier'
 // middleware to validate token
@@ -59,12 +57,12 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
     let result
     try {
-        if (images_regex.exec(req.file.path)) {
-            result = await upload_image(req).catch(error => res.status(400).json(error))
+        // if (images_regex.exec(req.file.path)) {
+        result = await upload_image(req).catch(error => res.status(400).json(error))
 
-        } else {
-            result = await upload_video(req).catch(error => res.status(400).json(error))
-        }
+        // // } else {
+        // result = await upload_video(req).catch(error => res.status(400).json(error))
+        // // }
 
         return res.status(201).json(result);
 
