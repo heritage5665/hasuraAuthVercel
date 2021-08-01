@@ -56,7 +56,7 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     const mimetype: string = req.file.mimetype
     const is_image = mimetype.split("/")[0] == "image"
     const is_video_or_audio = mimetype.split("/")[0] == "audio" || mimetype.split("/")[0] == "video"
-
+    console.log(mimetype)
     let result
     try {
         // if (images_regex.exec(req.file.path)) {
