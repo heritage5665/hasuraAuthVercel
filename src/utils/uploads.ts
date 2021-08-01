@@ -46,15 +46,12 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
                 }
             );
 
-            streamifier.createReadStream(req.file.buffer).pipe(stream);
+            return streamifier.createReadStream(req.file.buffer).pipe(stream);
         });
     };
 
-    async function upload(req: any) {
-        return await streamUpload(req);
-    }
 
-    const result = await upload(req)
+    const result = await streamUpload(req)
         .catch(error => res.status(400).json(error))
 
     return res.status(201).json(result);
