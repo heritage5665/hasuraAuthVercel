@@ -33,10 +33,9 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
             let resource_type
             if (!images_regex.exec(req.file.path)) {
                 resource_type = "video"
-            } else {
-                resource_type = "auto"
             }
-            let stream = cloudinary.uploader.upload_stream({ "resource_type": resource_type },
+            console.log(resource_type)
+            let stream = cloudinary.uploader.upload_stream({ "resource_type": resource_type ?? "image" },
                 (error, result) => {
                     if (result) {
                         resolve(result);
