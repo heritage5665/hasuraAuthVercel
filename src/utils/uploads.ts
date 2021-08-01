@@ -20,42 +20,58 @@ import streamifier from 'streamifier'
 //     return res.status(201).json(await uploadMan.upload(type, req.file))
 
 // };
-
-export const UploadToCloudinary = async function (req: any, res: Response, next: NextFunction) {
-    if (req.file == undefined) {
-        return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
-    }
-
-
-    const streamUpload = (req: any) => {
-        return new Promise((resolve, reject) => {
-
-            const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
-
-            const upload_callback = (error: any, result: any) => {
+const upload_image = (req: any) => {
+    return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream(
+            (error, result) => {
                 if (result) {
                     resolve(result);
                 } else {
                     reject(error);
                 }
             }
+        );
 
-            if (images_regex.exec(req.file.path)) {
-                const stream = cloudinary.uploader.upload_stream(upload_callback)
-                return streamifier.createReadStream(req.file.buffer).pipe(stream);
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
+};
+const upload_video = (req: any) => {
+    return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream({ "resource_type": "video" },
+            (error, result) => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
             }
+        );
 
-            const stream = cloudinary.uploader.upload_chunked_stream({ "resource_type": "video" }, upload_callback)
-            return streamifier.createReadStream(req.file.buffer).pipe(stream);
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
+};
 
-        });
-    };
+export const UploadToCloudinary = async function (req: any, res: Response, next: NextFunction) {
+    if (req.file == undefined) {
+        return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
+    }
 
+    const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
+    let result
+    try {
+        if (images_regex.exec(req.file.path)) {
+            result = await upload_image(req).catch(error => res.status(400).json(error))
 
-    const result = await streamUpload(req)
-        .catch(error => res.status(400).json(error))
+        } else {
+            result = await upload_video(req).catch(error => res.status(400).json(error))
+        }
 
-    return res.status(201).json(result);
+        return res.status(201).json(result);
+
+    } catch (error) {
+        return res.status(400).json({ "error": "try again latter" })
+    }
+
 
 
 }
