@@ -22,23 +22,31 @@ import streamifier from 'streamifier'
 // };
 
 export const UploadToCloudinary = async function (req: any, res: Response, next: NextFunction) {
+    if (req.file == undefined) {
+        return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
+    }
     let streamUpload = (req: any) => {
-        if (req.file == undefined) {
-            return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
-        }
-        return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                (error, result) => {
-                    if (result) {
-                        resolve(result);
-                    } else {
-                        reject(error);
-                    }
-                }
-            );
 
-            return streamifier.createReadStream(req.file.buffer).pipe(stream);
-        });
+        try {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    (error, result) => {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            reject(error);
+                        }
+                    }
+                );
+
+                return streamifier.createReadStream(req.file.buffer).pipe(stream);
+            });
+
+        } catch (error) {
+            return res.status(500).json(...error)
+
+        }
+
     };
 
     return await streamUpload(req);
