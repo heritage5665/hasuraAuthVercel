@@ -46,11 +46,9 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
         return await streamUpload(req);
     }
 
-    const result = await upload(req).
-        catch(error => console.error(error))
-    if (result == undefined) {
-        return res.status(500).json({ "msg": "error uploading media" })
-    }
+    const result = await upload(req)
+        .catch(error => res.status(400).json(error))
+
     return res.status(201).json(result);
 
 
