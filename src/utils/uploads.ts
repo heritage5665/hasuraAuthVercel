@@ -43,11 +43,10 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     };
 
     async function upload(req: any) {
-        let result = await streamUpload(req);
-        console.log(result);
+        return await streamUpload(req);
     }
 
-    upload(req);
+    return res.status(201).json(upload(req));
 
 
 
