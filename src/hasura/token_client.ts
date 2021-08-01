@@ -1,8 +1,6 @@
 
-
-
 import HttpClient from "./client.js";
-
+import { OTP_TABLE } from "../config/settings.js"
 interface HasuraTokenModel {
     user_id: string
     pin: string
@@ -26,7 +24,7 @@ export default class TokenClient extends HttpClient {
     public delete = async (user_id: string, pin: string) => await this.execute(
         `   
         mutation($user_id: String!,$pin:String!) {
-            delete_one_time_pins(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
+            delete_${OTP_TABLE}(where:{_and:[{user_id:{_eq:$user_id}},{pin:{_eq:$pin}}]}){
                 returning{
                     id
                     user_id
@@ -36,7 +34,7 @@ export default class TokenClient extends HttpClient {
         `, { user_id, pin }
     ).then(response => response)
         .then(({ delete_one_time_pins }) => delete_one_time_pins).then(({ returning }) => {
-            console.log(returning)
+            // console.log(returning)
             const { id, user_id } = returning
             if (user_id && id) return true
             return false
@@ -45,12 +43,12 @@ export default class TokenClient extends HttpClient {
     public save = async (token: HasuraTokenModel) => await this.execute(
         ` 
         mutation($user_id: String!,$pin:String!,$expires:timestamp) {
-            delete_one_time_pins(where:{user_id:{_eq:$user_id}}){
+            delete_${OTP_TABLE}(where:{user_id:{_eq:$user_id}}){
                 returning{
                     id
                 }
             }
-            insert_one_time_pins_one( object: {user_id:$user_id,pin:$pin,
+            insert_${OTP_TABLE}_one( object: {user_id:$user_id,pin:$pin,
                 expires:$expires}
             ) { 
                 id

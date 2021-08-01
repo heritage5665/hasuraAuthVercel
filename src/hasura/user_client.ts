@@ -1,6 +1,6 @@
 import HasuraHttpClient from "./client.js";
 import User from "./types/User.js";
-
+import { USER_TABLE, OTP_TABLE } from "../config/settings.js";
 export default class UserClient extends HasuraHttpClient {
     private static classInstance?: UserClient;
 
@@ -19,21 +19,22 @@ export default class UserClient extends HasuraHttpClient {
         `
          query GetAllUsers {
             users {
+                user_id
                 fullname
-                    email
-                    phone
-                    password
-                    isVerified
-                    passwordResetToken
-                    passwordResetExpires
+                email
+                phone
+                password
+                isVerified
+                passwordResetToken
+                passwordResetExpires
             }
         }
         `, {})
 
     public findOne = async (key: string) => await this.execute(
         `
-             query GetUserByKey($key:String!) {
-                users(where:{
+             query($key:String!) {
+                ${USER_TABLE}(where:{
                     _or: [
                         { email: {_eq: $key}},
                         { user_id: {_eq: $key}},
@@ -55,7 +56,7 @@ export default class UserClient extends HasuraHttpClient {
 
     public findUserByEmail = async (email: string) => await this.execute(
         `query GetUser($email:String!,$isVerified:Boolean!) {
-                users(where:{
+                ${USER_TABLE}(where:{
                     _and: [
                         { email: {_eq: $email}},
                         { isVerified: {_eq: $isVerified}}
@@ -73,10 +74,10 @@ export default class UserClient extends HasuraHttpClient {
 
     public save = async (user: User) => await this.execute(
         ` 
-            mutation CreateUserOne($user_id: String!,$fullname:String!,$email:String!,
+            mutation ($user_id: String!,$fullname:String!,$email:String!,
                 $password:String!,$isVerified:Boolean!,$phone:String,
                 $pin:String!,$expires:timestamp,$user_type:String!) {
-                    insert_users_one(
+                    insert_${USER_TABLE}_one(
                         object: {
                                 user_id: $user_id,
                                 user_type:$user_type,
@@ -115,7 +116,7 @@ export default class UserClient extends HasuraHttpClient {
         return await this.execute(
             `
             query FindUserWithToken($pin:String!){
-                one_time_pins(where:{pin:{_eq:$pin}},limit:1,order_by:{expires:desc}){
+                ${OTP_TABLE}(where:{pin:{_eq:$pin}},limit:1,order_by:{expires:desc}){
                     expires
                     user{
                         id 
@@ -149,7 +150,7 @@ export default class UserClient extends HasuraHttpClient {
         return await this.execute(
             `
             mutation VerifyUser($user_id:String!,$isVerified:Boolean!){
-                update_users(where:{user_id:{_eq:$user_id}},_set:{
+                update_${USER_TABLE}(where:{user_id:{_eq:$user_id}},_set:{
                     isVerified:$isVerified
                 }){
                     returning{
@@ -178,8 +179,8 @@ export default class UserClient extends HasuraHttpClient {
         }
         return await this.execute(
             `
-                mutation changeUserPassword($user_id:String!,$password:String!){
-                    update_users(where:{user_id:{_eq:$user_id}},_set:{
+                mutation ($user_id:String!,$password:String!){
+                    update_${USER_TABLE}(where:{user_id:{_eq:$user_id}},_set:{
                         password:$password
                     })
                     {
