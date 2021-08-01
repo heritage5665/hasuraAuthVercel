@@ -31,10 +31,7 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
         return new Promise((resolve, reject) => {
 
             const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
-            let resource_type
-            if (!images_regex.exec(req.file.path)) {
-                resource_type = "video"
-            }
+
             const upload_callback = (error: any, result: any) => {
                 if (result) {
                     resolve(result);
@@ -42,13 +39,15 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
                     reject(error);
                 }
             }
-            let stream;
-            if (resource_type == undefined) {
-                stream = cloudinary.uploader.upload_stream(upload_callback)
-            } else {
-                stream = cloudinary.uploader.upload_chunked_stream({ "resource_type": resource_type }, upload_callback)
+
+            if (images_regex.exec(req.file.path)) {
+                const stream = cloudinary.uploader.upload_stream(upload_callback)
+                return streamifier.createReadStream(req.file.buffer).pipe(stream);
             }
+
+            const stream = cloudinary.uploader.upload_chunked_stream({ "resource_type": "video" }, upload_callback)
             return streamifier.createReadStream(req.file.buffer).pipe(stream);
+
         });
     };
 
