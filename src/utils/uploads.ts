@@ -45,12 +45,10 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     async function upload(req: any) {
         return await streamUpload(req);
     }
-    try {
-        return res.status(201).json(await upload(req));
 
-    } catch (error) {
-        res.status(500).json(...error)
-    }
+    const result = await upload(req).catch(error => res.status(500).json(error))
+    return res.status(201).json(result);
+
 
 }
 
