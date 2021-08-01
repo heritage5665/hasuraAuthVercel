@@ -25,10 +25,15 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     if (req.file == undefined) {
         return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
     }
+    const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
+    let resource_type = "image";
+    if (!images_regex.exec(req.file.path)) {
+        resource_type = "vidoe"
+    }
 
-    let streamUpload = (req: any) => {
+    const streamUpload = (req: any) => {
         return new Promise((resolve, reject) => {
-            let stream = cloudinary.uploader.upload_stream(
+            let stream = cloudinary.uploader.upload_stream({ "resource_type": resource_type },
                 (error, result) => {
                     if (result) {
                         resolve(result);
