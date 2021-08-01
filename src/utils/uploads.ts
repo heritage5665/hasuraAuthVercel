@@ -53,24 +53,28 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
     if (req.file == undefined) {
         return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
     }
+    const mimetype: string = req.file.mimetype
+    const is_image = mimetype.split("/")[0] == "image"
+    const is_video_or_audio = mimetype.split("/")[0] == "audio" || mimetype.split("/")[0] == "video"
 
-    const images_regex = /(\.jpg|\.jpeg|\.png|\.gif)$/i
     let result
     try {
         // if (images_regex.exec(req.file.path)) {
-        result = await upload_image(req).catch(error => res.status(400).json(error))
 
-        // // } else {
-        // result = await upload_video(req).catch(error => res.status(400).json(error))
-        // // }
+        if (is_image) {
+            result = await upload_image(req).catch(error => res.status(400).json(error))
+        }
+        if (is_video_or_audio) {
+            result = await upload_video(req).catch(error => res.status(400).json(error))
+        } else {
+            return res.status(400).json({ "msg": "invalid image, audio or video given", 'error': 'Bad Request' })
+        }
 
         return res.status(201).json(result);
 
     } catch (error) {
         return res.status(400).json({ "error": "try again latter" })
     }
-
-
 
 }
 
