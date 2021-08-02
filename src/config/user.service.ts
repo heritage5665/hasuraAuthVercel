@@ -235,7 +235,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
   if (user.email != email) {
     throw "Username or password is incorrect";
   }
-  const refreshToken = await generateRefreshToken(user);
+  // const refreshToken = await generateRefreshToken(user);
   const authToken = generateAuthToken(user);
 
   return {

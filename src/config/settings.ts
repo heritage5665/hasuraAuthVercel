@@ -6,4 +6,4 @@ export const SENDGRID_KEY = "SG.iNbCmfKMTSGuOrxeJt8KKQ.TAOxbKLHe7e3qVknvRLwHyM23
 export const TOKEN_EXPIRED_IN = 60 * 24
 export const MAIL_FROM = "support@convoy.com"
 export const USER_TABLE = "users"
-export const OTP_TABLE = "one_time_password"
+export const OTP_TABLE = "one_time_pins"
