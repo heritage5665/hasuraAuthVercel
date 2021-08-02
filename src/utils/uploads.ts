@@ -9,7 +9,7 @@ const uploadStream = (req: any) => {
     let type: string = mimetype.split("/")[0]
     let resource_type: string
     switch (type) {
-        case 'image':
+        case 'auto':
             resource_type = 'image'
         case 'audio':
         case 'video':
