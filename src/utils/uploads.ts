@@ -46,9 +46,6 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
         }
         if (is_video_or_audio) {
             result = await upload_video(req).catch(error => res.status(400).json(error))
-        } else {
-            console.error(mimetype)
-            return res.status(400).json({ "msg": "invalid image, audio or video given", 'error': 'Bad Request' })
         }
 
         return res.status(201).json(result);
