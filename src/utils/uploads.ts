@@ -35,9 +35,10 @@ export const UploadToCloudinary = async function (req: any, res: Response, next:
         return res.status(400).json({ "msg": "media is required", 'error': 'Bad Request' })
     }
     const mimetype: string = req.file.mimetype
-    // const is_image = mimetype.split("/")[0] == "image"
-    // const is_video_or_audio = mimetype.split("/")[0] == "audio" || mimetype.split("/")[0] == "video"
-    // // return res.status(200).json({ mimetype, is_image, is_video_or_audio })
+    const is_image = mimetype.split("/")[0] == "image"
+    const is_video_or_audio = mimetype.split("/")[0] == "audio" || mimetype.split("/")[0] == "video"
+    return res.status(200).json({ mimetype, is_image, is_video_or_audio })
+    let result
     try {
         // if (images_regex.exec(req.file.path)) {
 
