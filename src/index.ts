@@ -1,4 +1,4 @@
-import json from "body-parser";
+import * as json from "body-parser";
 import express from "express";
 import router from "./routes/user_route.js";
 import price_router from "./routes/price_recommedation.js";
@@ -23,9 +23,9 @@ cloudinary.config({
   // secure: true
 });
 
-app.use(json());
+app.use(json.json());
 app.post("/web-auth", AuthWebHook)
-app.use("price", price_router);
+app.use("price_estimate", price_router);
 app.post("/upload", fileUpload.single('media'), verifyToken, UploadToCloudinary)
 app.use("/user", router);
 
