@@ -13,8 +13,8 @@ type latitude = number
 type longitude = number
 
 type Coordinate = {
-    longitude: latitude
-    latitude: longitude
+    longitude: longitude
+    latitude: latitude
 }
 
 const isValidCoordinate = (cord: Coordinate) => {
@@ -46,9 +46,9 @@ const calculateRateRange = (req: Request): priceRange => {
 
     const company_rate = {
         base_price: 300,
-        price_per_km: 1.5,
-        price_per_seconds: 0.001,
-        package_size: 0.1
+        price_per_km: 150,
+        price_per_seconds: 100,
+        package_size: 90
     }
 
     const price = [
