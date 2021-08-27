@@ -20,10 +20,11 @@ type Coordinate = {
 const isValidCoordinate = (cord: Coordinate) => {
     const isLatitude = (num: number) => isFinite(num) && Math.abs(num) <= 90;
     const isLongitude = (num: number) => isFinite(num) && Math.abs(num) <= 180;
-    if (!isLatitude(cord.latitude) || !isLongitude(cord.longitude)) {
-        return Promise.reject("invalid ccordinated given");
+    if (isLatitude(cord.latitude) && isLongitude(cord.longitude)) {
+        return true
     }
-    return true
+
+    return false
 
 }
 
@@ -85,7 +86,7 @@ const getApproxTravelDistance = (start: Coordinate, end: Coordinate) => {
 }
 
 async function validateCordinates(start: Coordinate, end: Coordinate) {
-    const is_valid = await isValidCoordinate(start) && await isValidCoordinate(end)
+    const is_valid = isValidCoordinate(start) && isValidCoordinate(end)
     if (is_valid) {
         return Promise.reject({
             errors: [
@@ -95,7 +96,6 @@ async function validateCordinates(start: Coordinate, end: Coordinate) {
                     "param": ["start", "end"],
                     "location": "body"
                 }
-
             ]
         })
     }
@@ -108,7 +108,7 @@ price_router.post("/range", verifyToken, async (req: any, res: Response) => {
     try {
         const ratePerDistanceRate = calculateRateRange(req)
         const { start, end } = req.body
-        await validateCordinates(start, end)
+        // await validateCordinates(start, end)
         return res.status(200).json({
             data: {
                 ...ratePerDistanceRate
