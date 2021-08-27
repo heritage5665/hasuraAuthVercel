@@ -25,7 +25,7 @@ cloudinary.config({
 
 app.use(pkg.json());
 app.post("/web-auth", AuthWebHook)
-app.use("price_estimate", price_router);
+app.use("/price_estimate", price_router);
 app.post("/upload", fileUpload.single('media'), verifyToken, UploadToCloudinary)
 app.use("/user", router);
 
