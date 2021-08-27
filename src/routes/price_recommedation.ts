@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { check, CustomValidator } from "express-validator";
+// import { check, CustomValidator } from "express-validator";
 import { validateInput } from "../config/user.service.js";
 import { verifyToken } from '../utils/validate-token.js';
 
@@ -85,7 +85,6 @@ const getApproxTravelDistance = (start: Coordinate, end: Coordinate) => {
 }
 
 async function validateCordinates(start: Coordinate, end: Coordinate) {
-
     const is_valid = await isValidCoordinate(start) && await isValidCoordinate(end)
     if (is_valid) {
         return Promise.reject({
@@ -105,24 +104,21 @@ async function validateCordinates(start: Coordinate, end: Coordinate) {
 }
 
 
-price_router.post("/range", validateInput,
-    verifyToken, async (req: any, res: Response) => {
-        try {
-
-            const ratePerDistanceRate = calculateRateRange(req)
-            const { start, end } = req.body
-            await validateCordinates(start, end)
-            return res.status(200).json({
-                data: {
-                    ...ratePerDistanceRate
-                },
-                "status": "true"
-            })
-        } catch (error) {
-            return res.json(error).status(400)
-
-        }
-    })
+price_router.post("/range", verifyToken, async (req: any, res: Response) => {
+    try {
+        const ratePerDistanceRate = calculateRateRange(req)
+        const { start, end } = req.body
+        await validateCordinates(start, end)
+        return res.status(200).json({
+            data: {
+                ...ratePerDistanceRate
+            },
+            "status": "true"
+        })
+    } catch (error) {
+        return res.json(error).status(400)
+    }
+})
 
 // module.exports = price_router;
 export default price_router
