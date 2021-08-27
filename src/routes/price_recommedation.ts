@@ -17,18 +17,20 @@ type Coordinate = {
     latitude: longitude
 }
 
-const isValidCoordinate: CustomValidator = (cord: Coordinate) => {
+const isValidCoordinate = (cord: Coordinate) => {
     const isLatitude = (num: number) => isFinite(num) && Math.abs(num) <= 90;
     const isLongitude = (num: number) => isFinite(num) && Math.abs(num) <= 180;
-    if (!isLatitude(cord.latitude) && !isLongitude(cord.longitude)) {
+    if (!isLatitude(cord.latitude) || !isLongitude(cord.longitude)) {
         return Promise.reject("invalid ccordinated given");
     }
+    return true
+
 }
 
-const validateLocation = [
-    check("start").custom(isValidCoordinate),
-    check("end").custom(isValidCoordinate)
-]
+// const validateLocation = [
+//     check("start").notEmpty().custom(isValidCoordinate),
+//     check("end").notEmpty().custom(isValidCoordinate)
+// ]
 
 
 
@@ -82,16 +84,44 @@ const getApproxTravelDistance = (start: Coordinate, end: Coordinate) => {
 
 }
 
+async function validateCordinates(start: Coordinate, end: Coordinate) {
 
-price_router.post("/range", validateLocation, validateInput,
-    verifyToken, async (req: any, res: Response) => {
-        const ratePerDistanceRate = calculateRateRange(req)
-        return res.status(200).json({
-            data: {
-                ...ratePerDistanceRate
-            },
-            "status": "true"
+    const is_valid = await isValidCoordinate(start) && await isValidCoordinate(end)
+    if (is_valid) {
+        return Promise.reject({
+            errors: [
+                {
+                    "value": [start, end],
+                    "msg": "coordinates given is invalid",
+                    "param": ["start", "end"],
+                    "location": "body"
+                }
+
+            ]
         })
+    }
+
+
+}
+
+
+price_router.post("/range", validateInput,
+    verifyToken, async (req: any, res: Response) => {
+        try {
+
+            const ratePerDistanceRate = calculateRateRange(req)
+            const { start, end } = req.body
+            await validateCordinates(start, end)
+            return res.status(200).json({
+                data: {
+                    ...ratePerDistanceRate
+                },
+                "status": "true"
+            })
+        } catch (error) {
+            return res.json(error).status(400)
+
+        }
     })
 
 // module.exports = price_router;
