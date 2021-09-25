@@ -137,12 +137,13 @@ export function decrypt(text: string) {
   return decrypted.toString();
 }
 export async function sendMail(content: MailContent) {
-  await sendMailUsingSmtp(content).
-    then(info => console.log(info.messageId))
-  await sgMail.send(content)
-    .then(response => console.log("response", response))
-    .catch(error => console.log("mail error", error))
-  return true
+  try {
+    await sendMailUsingSmtp(content)
+    await sgMail.send(content)
+    return
+  } catch {
+    return false
+  }
 }
 
 export function expiresIn(minutes: any) {
