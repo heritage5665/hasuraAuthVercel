@@ -200,6 +200,15 @@ export function verifyUserToken(user: any, email: string, res: Response) {
 
 }
 
+export async function getVerifiedUserWith(email_or_phone_id: string) {
+  const user = await userDB.findOne(email_or_phone_id);
+  if (user && user.isVerified) {
+    return user
+  }
+  return false;
+
+}
+
 export async function getUserWithEmail(email: string) {
   return await userDB.findOne(email)
     .then(user => {
@@ -234,7 +243,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
     throw "Username or password is incorrect";
   }
   if (user.email != email) {
-    throw "Username or password is incorrect";
+    return false;
   }
   await generateRefreshToken(user);
   const authToken = generateAuthToken(user);
