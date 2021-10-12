@@ -166,8 +166,8 @@ export function generateAuthToken(user: any, expires_in: number = 24 * 60) {
 
 export async function verifyUserAuthToken(token: string) {
   const [user_id, expires] = decrypt(token).split("::")
-  if (parseInt(expires) < (new Date()).getTime())
-    return Promise.reject("expired auth_token given")
+  // if (parseInt(expires) < (new Date()).getTime())
+  //   return Promise.reject("expired auth_token given")
 
   const user = await userDB.findOne(user_id)
   if (!user)
