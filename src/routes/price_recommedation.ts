@@ -7,7 +7,8 @@ const price_router = express.Router();
 
 type priceRange = {
     min: number
-    max: number
+    max: number,
+    avg_time_taken: number
 }
 type latitude = number
 type longitude = number
@@ -28,10 +29,6 @@ const isValidCoordinate = (cord: Coordinate) => {
 
 }
 
-// const validateLocation = [
-//     check("start").notEmpty().custom(isValidCoordinate),
-//     check("end").notEmpty().custom(isValidCoordinate)
-// ]
 
 
 
@@ -58,7 +55,8 @@ const calculateRateRange = (req: Request): priceRange => {
 
     return {
         min: Math.min(...price),
-        max: Math.max(...price)
+        max: Math.max(...price),
+        avg_time_taken
     }
 
 }
@@ -108,7 +106,7 @@ price_router.post("/range", verifyToken, async (req: any, res: Response) => {
     try {
         const ratePerDistanceRate = calculateRateRange(req)
         const { start, end } = req.body
-        // await validateCordinates(start, end)
+        await validateCordinates(start, end)
         return res.status(200).json({
             data: {
                 ...ratePerDistanceRate
