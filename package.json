@@ -11,11 +11,7 @@
     "deploy": "git add . && git commit -m deployment &&  git push grey && git push heroku master"
   },
   "engines": {
-<<<<<<< HEAD
     "node": "^16.x",
-=======
-    "node": "^14.x",
->>>>>>> 104173064c756739c598c4c9a6564346f6b8c9a6
     "yarn": "1.x"
   },
   "keywords": [],
