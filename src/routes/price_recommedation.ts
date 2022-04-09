@@ -10,6 +10,7 @@ type priceRange = {
     min: number
     max: number,
     avg_time_taken: number
+    speed: number
 }
 type latitude = number
 type longitude = number
@@ -82,7 +83,8 @@ const calculateRateRange = (req: Request): priceRange => {
         distance,
         min: Math.min(...price),
         max: Math.max(...price),
-        avg_time_taken
+        avg_time_taken,
+        speed: avg_car_speed
     }
 
 }
