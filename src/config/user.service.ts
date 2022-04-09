@@ -166,8 +166,8 @@ export function generateAuthToken(user: any, expires_in: number = 24 * 60) {
 
 export async function verifyUserAuthToken(token: string) {
   const [user_id, expires] = decrypt(token).split("::")
-  if (parseInt(expires) < (new Date()).getTime())
-    return Promise.reject("expired auth_token given")
+  // if (parseInt(expires) < (new Date()).getTime())
+  //   return Promise.reject("expired auth_token given")
 
   const user = await userDB.findOne(user_id)
   if (!user)
@@ -197,6 +197,15 @@ export function verifyUserToken(user: any, email: string, res: Response) {
     });
   }
   return true
+
+}
+
+export async function getVerifiedUserWith(email_or_phone_id: string) {
+  const user = await userDB.findOne(email_or_phone_id);
+  if (user && user.isVerified) {
+    return user
+  }
+  return false;
 
 }
 
@@ -234,7 +243,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
     throw "Username or password is incorrect";
   }
   if (user.email != email) {
-    throw "Username or password is incorrect";
+    return false;
   }
   await generateRefreshToken(user);
   const authToken = generateAuthToken(user);

@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import {
   authenticate, generateOTP, expiresIn, verifyUserToken,
   getUserWithEmail, generateAuthToken, validateInput, signupValidation,
-  VerifyEmailvalidation, validateEmail, createVerificationTokenFor,
+  VerifyEmailvalidation, validateEmail, createVerificationTokenFor, getVerifiedUserWith,
   validateLoginInput, validateTokenInput, validateResetToken, sendMail,
   successMessage, validateUserIsLogin, errorMessage, assertNotVerified, validateUserEmail
 } from "../config/user.service.js";
@@ -146,11 +146,22 @@ router.post(
   "/login",
   validateLoginInput, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
-    return await getUserWithEmail(email)
-      .then(async user => await authenticate({ email, password }, user))
-      .then(resp => res.status(200).json(resp))
-      .catch(error => res.status(401).json({ error }));
+    try {
+      const { email, password } = req.body;
+      const user = await getVerifiedUserWith(email)
+      if (!user) {
+        return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
+      }
+      const authenticated = await authenticate({ email, password }, user)
+      if (!authenticated) {
+        return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
+      }
+      return res.status(200).json(authenticated)
+
+    } catch {
+      return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
+    }
+
   }
 );
 
@@ -187,10 +198,10 @@ router.post("/verify-reset-token",
   async (req: any, res: Response) => {
     const { token } = req.body;
     const { user_id } = req.user
-    console.log(user_id)
+    // console.log(user_id)
     await validateResetToken(token, user_id)
       .then(async validated => {
-        console.log("found")
+        // console.log("found")
         const auth_token = generateAuthToken(req.user)
         return res.status(200).json({
           status: true,
