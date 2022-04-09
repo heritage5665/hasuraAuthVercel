@@ -106,7 +106,7 @@ price_router.post("/range", verifyToken, async (req: any, res: Response) => {
     try {
         const ratePerDistanceRate = calculateRateRange(req)
         const { start, end } = req.body
-        await validateCordinates(start, end)
+        // await validateCordinates(start, end)
         return res.status(200).json({
             data: {
                 ...ratePerDistanceRate
