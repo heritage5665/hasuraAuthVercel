@@ -6,6 +6,7 @@ import { verifyToken } from '../utils/validate-token.js';
 const price_router = express.Router();
 
 type priceRange = {
+    distance: number
     min: number
     max: number,
     avg_time_taken: number
@@ -78,6 +79,7 @@ const calculateRateRange = (req: Request): priceRange => {
     ]
 
     return {
+        distance,
         min: Math.min(...price),
         max: Math.max(...price),
         avg_time_taken
@@ -91,7 +93,7 @@ const getApproxTravelDistance = (start: Coordinate, end: Coordinate) => {
         return num * Math.PI / 180;
     }
     const COORD_FACTOR = 1e7;
-    const R = 6371000;  // earth radius in metres
+    // const R = 6371000;  // earth radius in metres
     const lat1 = toRadians(start.latitude);
     const lat2 = toRadians(end.latitude);
     const lon1 = toRadians(start.longitude);
