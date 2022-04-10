@@ -256,7 +256,7 @@ export async function authenticate({ email, password }: Authenticate, user: any)
 }
 // needs complete rewrite
 export const isValidEmail: CustomValidator = async (value: string) => {
-  const user = await userDB.findOne(value);
+  const user = await userDB.findOne(value.toLowerCase());
   if (user) {
     return Promise.reject("E-mail already in use");
   }
@@ -342,8 +342,7 @@ export const signupValidation = [
     .trim()
     .escape(),
   check("fullname", "Please enter a fullname").not()
-    .isEmpty()
-    .isAlpha().trim().escape(),
+    .isEmpty(),
   check("password", "Please enter a valid password").isLength({
     min: 8,
   }),

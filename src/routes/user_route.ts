@@ -17,6 +17,12 @@ import { verifyToken } from '../utils/validate-token.js';
 import { ONE_TIME_PASSWORD_TOKEN_LENGTH, TOKEN_EXPIRED_IN, MAIL_FROM } from "../config/settings.js";
 const router = express.Router();
 
+type signUpRequest = {
+  fullname: string
+  email: string
+  phone: string
+  password: string
+}
 const HasuraUser: UserClient = UserClient.getInstance()
 // const HasuraToken: TokenClient = TokenClient.getInstance()
 /**
@@ -29,15 +35,17 @@ router.post(
   signupValidation,
   validateInput,
   async (req: Request, res: Response) => {
-    let { fullname, email, phone, password } = req.body;
+    let signupRequestBody: signUpRequest = req.body;
     const user_type: string = "user"
     const user_id: string = uuidv4()
     const isVerified = false
 
     const salt = await bcrypt.genSalt(10);
-    password = await bcrypt.hash(password, salt);
+    signupRequestBody.password = await bcrypt.hash(signupRequestBody.password, salt);
+    signupRequestBody.email = signupRequestBody.email.toLowerCase()
     const pin = generateOTP(ONE_TIME_PASSWORD_TOKEN_LENGTH)
     const expires = expiresIn(TOKEN_EXPIRED_IN)
+    const { email, password, phone, fullname } = signupRequestBody
     const user = await HasuraUser.save({
       email, password, phone, fullname, user_type, user_id, isVerified, pin, expires
     });
@@ -148,7 +156,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-      const user = await getVerifiedUserWith(email)
+      const user = await getVerifiedUserWith(email.toLowerCase())
       if (!user) {
         return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
       }
