@@ -3,14 +3,14 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 // import { db } from "./db";
-import UserClient from '../hasura/user_client.js';
-import TokenClient from '../hasura/token_client.js';
+import UserClient from '../hasura/user_client';
+import TokenClient from '../hasura/token_client';
 import { CustomValidator } from "express-validator";
 import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
-import { ONE_TIME_PASSWORD_TOKEN_LENGTH } from "./settings.js";
+import { ONE_TIME_PASSWORD_TOKEN_LENGTH } from "./settings";
 
 // import { constants } from "buffer";
 interface Authenticate {

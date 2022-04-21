@@ -8,13 +8,13 @@ import {
   VerifyEmailvalidation, validateEmail, createVerificationTokenFor, getVerifiedUserWith,
   validateLoginInput, validateTokenInput, validateResetToken, sendMail,
   successMessage, validateUserIsLogin, errorMessage, assertNotVerified, validateUserEmail
-} from "../config/user.service.js";
+} from "../config/user.service";
 
 
 import { v4 as uuidv4 } from 'uuid';
-import UserClient from '../hasura/user_client.js';
-import { verifyToken } from '../utils/validate-token.js';
-import { ONE_TIME_PASSWORD_TOKEN_LENGTH, TOKEN_EXPIRED_IN, MAIL_FROM } from "../config/settings.js";
+import UserClient from '../hasura/user_client';
+import { verifyToken } from '../utils/validate-token';
+import { ONE_TIME_PASSWORD_TOKEN_LENGTH, TOKEN_EXPIRED_IN, MAIL_FROM } from "../config/settings";
 const router = express.Router();
 
 type signUpRequest = {

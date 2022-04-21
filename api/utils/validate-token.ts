@@ -1,6 +1,6 @@
 
 import { Response, NextFunction } from "express";
-import { verifyUserAuthToken } from "../config/user.service.js";
+import { verifyUserAuthToken } from "../config/user.service";
 // middleware to validate token
 export const verifyToken = async (req: any, res: Response, next: NextFunction) => {
   const token = req.header("Authorization");

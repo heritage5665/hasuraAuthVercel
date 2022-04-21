@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { HASURA_GRAPHQL_ENGINE_BASE_URL, HASURA_ADMIN_SECRET } from "../config/settings.js"
+import { HASURA_GRAPHQL_ENGINE_BASE_URL, HASURA_ADMIN_SECRET } from "../config/settings"
 // import HasuraHeader from "./types/User"
 
 declare module 'axios' {

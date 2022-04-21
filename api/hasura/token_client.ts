@@ -1,7 +1,7 @@
 
 
 
-import HttpClient from "./client.js";
+import HttpClient from "./client";
 
 interface HasuraTokenModel {
     user_id: string

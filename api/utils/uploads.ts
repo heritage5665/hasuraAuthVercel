@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express";
 // import DatauriParser from 'datauri/parser.js';
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from 'streamifier'
-import { errorMessage } from "../config/user.service.js";
+import { errorMessage } from "../config/user.service";
 
 const uploadStream = (req: any) => {
     return new Promise((resolve, reject) => {

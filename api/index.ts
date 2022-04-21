@@ -1,13 +1,13 @@
 import pkg from "body-parser";
 import express from "express";
-import router from "./routes/user_route.js";
-import price_router from "./routes/price_recommedation.js";
+import router from "./routes/user_route";
+import price_router from "./routes/price_recommedation";
 import multer from 'multer';
-import { AuthWebHook } from "./utils/web-hook-auth.js";
+import { AuthWebHook } from "./utils/web-hook-auth";
 import sgMail from "@sendgrid/mail";
-import { verifyToken } from "./utils/validate-token.js";
-import { UploadToCloudinary } from "./utils/uploads.js";
-import { SENDGRID_KEY } from "./config/settings.js";
+import { verifyToken } from "./utils/validate-token";
+import { UploadToCloudinary } from "./utils/uploads";
+import { SENDGRID_KEY } from "./config/settings";
 import { v2 as cloudinary } from "cloudinary";
 
 const app = express();

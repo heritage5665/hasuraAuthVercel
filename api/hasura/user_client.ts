@@ -1,5 +1,5 @@
-import HasuraHttpClient from "./client.js";
-import User from "./types/User.js";
+import HasuraHttpClient from "./client";
+import User from "./types/User";
 
 export default class UserClient extends HasuraHttpClient {
     private static classInstance?: UserClient;

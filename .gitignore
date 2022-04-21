@@ -120,3 +120,4 @@ dist
 node_modules
 build
 /build
+.vercel

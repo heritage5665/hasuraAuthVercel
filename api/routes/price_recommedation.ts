@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 // import { check, CustomValidator } from "express-validator";
 // import { validateInput } from "../config/user.service.js";
-import { verifyToken } from '../utils/validate-token.js';
+import { verifyToken } from '../utils/validate-token';
 
 const price_router = express.Router();
 
