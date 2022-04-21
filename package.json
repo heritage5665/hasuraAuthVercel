@@ -5,13 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd ./build && node index.js",
-    "build": "tsc --project ./",
-    "deploy": "git add . && git commit -m deployment &&  git push grey && git push heroku master"
+    "start": "vercel dev",
+    "deploy": "vercel deploy --prod"
   },
   "engines": {
-    "node": "^14.x",
+    "node": "^16.x",
     "yarn": "1.x"
   },
   "keywords": [],
@@ -34,7 +32,8 @@
     "multer": "^1.4.2",
     "nodemailer": "^6.6.2",
     "streamifier": "^0.1.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "vercel": "^24.1.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

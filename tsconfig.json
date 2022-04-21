@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "es6",
         "module": "es2020",
-        "rootDir": "./src",
+        "rootDir": "./api",
         "outDir": "./build",
         "esModuleInterop": true,
         "moduleResolution": "node",
