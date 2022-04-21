@@ -9,7 +9,7 @@
     "deploy": "vercel deploy --prod"
   },
   "engines": {
-    "node": "^16.x",
+    "node": "14.x",
     "yarn": "1.x"
   },
   "keywords": [],
