@@ -12,9 +12,9 @@ import { v2 as cloudinary } from "cloudinary";
 
 const app = express();
 const fileUpload = multer()
-const PORT = process.env.PORT || 4000;
+// const PORT = process.env.PORT || 4000;
 
-sgMail.setApiKey(SENDGRID_KEY);
+sgMail.setApiKey(SENDGRID_KEY??'');
 
 cloudinary.config({
   cloud_name: 'techbird',
