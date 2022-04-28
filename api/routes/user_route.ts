@@ -7,7 +7,8 @@ import {
   getUserWithEmail, generateAuthToken, validateInput, signupValidation,
   VerifyEmailvalidation, validateEmail, createVerificationTokenFor, getVerifiedUserWith,
   validateLoginInput, validateTokenInput, validateResetToken, sendMail,
-  successMessage, validateUserIsLogin, errorMessage, assertNotVerified, validateUserEmail
+  successMessage, validateUserIsLogin, errorMessage, assertNotVerified, validateUserEmail,
+  isTokenExpired, authUserDetails,generateAuthRefreshToken
 } from "../config/user.service";
 
 
@@ -25,6 +26,8 @@ type signUpRequest = {
 }
 const HasuraUser: UserClient = UserClient.getInstance()
 // const HasuraToken: TokenClient = TokenClient.getInstance()
+
+
 /**
  * @method - POST
  * @param - /signup
@@ -160,7 +163,7 @@ router.post(
       if (!user) {
         return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
       }
-      const authenticated = await authenticate({ email, password }, user)
+      const authenticated = await authenticate({  password }, user)
       if (!authenticated) {
         return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
       }
@@ -277,6 +280,47 @@ router.post("/change-password",
     }))
   }
 );
+
+/**
+ * @method - POST
+ * @description - refeshToken 
+ */
+
+ router.post("/auth/refresh", async (req: Request, res: Response) => {
+  let { refreshToken } = req.body;
+  if (refreshToken == null) {
+    return res.json({ error: "validation error", msg: "refreshToken is required" })
+  }
+
+  const foundUserOrError = await UserClient
+    .getInstance()
+    .getRefreshTokenWith(refreshToken)
+
+  console.log(foundUserOrError);
+
+  if (!foundUserOrError) {
+    return res.json({ error: "refresh token not found", msg: "refresh token not found please login to generate refresh token" })
+  }
+  const { user, expire_at } = foundUserOrError
+  const hasExpired = isTokenExpired(expire_at)
+
+  if (hasExpired == true) {
+    // delete the toke and has the user to login again
+    await UserClient.getInstance().deleteRefreshToken(user.user_id)
+    return res
+      .json({ msg: "refresh token has expired please login to generare a new login token", error: "expired token" })
+      .status(401)
+
+  }
+  const { user_id } = user
+  // rotate token to improve token credibility, keep the token expiration
+  refreshToken = await generateAuthRefreshToken()
+  await UserClient.getInstance().updateRefreshTokenFor(user_id, refreshToken)
+  return res.json(authUserDetails(user, refreshToken))
+
+
+});
+
 
 
 // module.exports = router;

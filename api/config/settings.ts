@@ -8,3 +8,4 @@ export const TOKEN_EXPIRED_IN = 60 * 24
 export const MAIL_FROM = "support@convoy.com"
 export const USER_TABLE = "users"
 export const OTP_TABLE = "one_time_pins"
+export const REFRESH_TOKEN_LENGTH =24

@@ -15,6 +15,33 @@ export default class UserClient extends HasuraHttpClient {
         return this.classInstance
     }
 
+    public createRefreshToken = async (token: any) => await this.execute(`
+    mutation createToken($token: refresh_tokens_insert_input!) {
+      insert_refresh_tokens_one(object: $token, 
+        on_conflict: {constraint: refresh_tokens_pkey, update_columns: [token, expired_at]}) {
+        token
+        expired_at
+      }
+    }
+  `, { token }).then(data => data).then(({ insert_refresh_tokens_one }) => insert_refresh_tokens_one)
+
+
+    public updateRefreshTokenFor = async (user_id: string, token: string) => await this.execute(`
+        mutation updateRefreshTokenFor($user_id: String!, $token: String!) {
+            update_refresh_tokens_by_pk(pk_columns: {user_id: $user_id}, _set: {token: $token}) {
+                user_id
+            }
+        }`, { user_id, token }).then(data => data).then(({ update_refresh_tokens_by_pk }) => update_refresh_tokens_by_pk)
+
+    public deleteRefreshToken = async (user_id: string) => await this.execute(`
+        mutation deleteRefresh($user_id: String!) {
+            delete_refresh_tokens(where: {user_id: {_eq: $user_id}}) {
+                affected_rows
+            }
+        }
+    `, { user_id })
+
+
     public getUsers = async () => await this.execute(
         `
          query GetAllUsers {
@@ -29,6 +56,21 @@ export default class UserClient extends HasuraHttpClient {
             }
         }
         `, {})
+    
+    public getRefreshTokenWith = async (token: string) => await this.execute(`
+        query getRefreshTokeBy($token: String!) {
+            refresh_tokens(where: {token: {_eq: $token}}) {
+                created_at
+                expired_at
+                user {
+                    user_id email phone user_type isVerified password 
+                    stores{ store_id store_name  } 
+                    referral:invitation_code{code} 
+                }
+            }
+        }
+        
+    `, { token }).then(data => data).then(({ refresh_tokens }) => refresh_tokens[0])
 
     public findOne = async (key: string) => await this.execute(
         `
@@ -143,6 +185,22 @@ export default class UserClient extends HasuraHttpClient {
 
     }
 
+    public getRefreshTokenForUser = async (user_id: string) => await this.execute(`
+        query refreshTokenByPK($user_id: String!) {
+            refresh_tokens_by_pk(user_id: $user_id) {
+                created_at
+                expired_at
+                user {
+                email
+                user_id
+                user_type
+                phone
+                }
+            }
+        }
+    `, { user_id }).then(data => data).then(({ refresh_tokens_by_pk }) => refresh_tokens_by_pk)
+
+
     public verifyUser = async (user: any) => {
         const isVerified = true
         const { user_id } = user
@@ -194,4 +252,7 @@ export default class UserClient extends HasuraHttpClient {
             .catch(errr => Promise.reject(errr))
     }
 
+
+
 }
+

@@ -10,11 +10,11 @@ import { Response, NextFunction } from "express";
 import { validationResult, check } from "express-validator";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
-import { ONE_TIME_PASSWORD_TOKEN_LENGTH } from "./settings";
+import { ONE_TIME_PASSWORD_TOKEN_LENGTH,REFRESH_TOKEN_LENGTH } from "./settings";
 
 // import { constants } from "buffer";
 interface Authenticate {
-  email: string;
+  email?: string;
   password: string;
 }
 const userDB = UserClient.getInstance()
@@ -55,6 +55,26 @@ async function sendMailUsingSmtp(content: MailContent) {
   // send mail with defined transport object
   return await transporter.sendMail(content);
 
+
+}
+
+
+export const authUserDetails = (user: any, refreshToken: string) => ({
+  ...basicDetails(user),
+  authToken: generateAuthToken(user, 5 * 24 * 60), refreshToken
+})
+
+export const isTokenExpired = (expire_at: string) => {
+  const expires_in = (new Date(expire_at)).getTime()
+
+  const now = new Date().getTime()
+  // const offsetNow = new Date(now + timeoffset * 60000).getTime()
+  if (expires_in < now) {
+    return true
+
+  }
+  return false
+  // verifyUserToken(user)
 
 }
 
@@ -238,22 +258,50 @@ export function basicDetails(user: any) {
   return { user_id, fullname, email };
 }
 
-export async function authenticate({ email, password }: Authenticate, user: any) {
+
+export async function authenticate({ password }: Authenticate, user: any) {
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    throw "Username or password is incorrect";
+    throw Error("Username or password is incorrect");
   }
-  if (user.email != email) {
-    return false;
+
+  const THREE_DAYS = 3 * 24 * 60
+  const refeshTokens = await UserClient.getInstance().getRefreshTokenForUser(user.user_id)
+  if (refeshTokens) {
+    UserClient.getInstance().deleteRefreshToken(user.user_id)
   }
-  await generateRefreshToken(user);
-  const authToken = generateAuthToken(user);
+
+  const authToken = generateAuthToken(user, THREE_DAYS);
+  const token = generateOTP(REFRESH_TOKEN_LENGTH)
+
+  await UserClient.getInstance().createRefreshToken({
+    token: token,
+    user_id: user.user_id,
+    expired_at: expiresIn(31 * 24 * 60)
+  })
 
   return {
     ...basicDetails(user),
-    authToken,
-    // refreshToken: refreshToken.pin,
+    authToken, refreshToken: token
   };
 }
+
+
+// export async function authenticate({ email, password }: Authenticate, user: any) {
+//   if (!user || !bcrypt.compareSync(password, user.password)) {
+//     throw "Username or password is incorrect";
+//   }
+//   if (user.email != email) {
+//     return false;
+//   }
+//   await generateRefreshToken(user);
+//   const authToken = generateAuthToken(user);
+
+//   return {
+//     ...basicDetails(user),
+//     authToken,
+//     // refreshToken: refreshToken.pin,
+//   };
+// }
 // needs complete rewrite
 export const isValidEmail: CustomValidator = async (value: string) => {
   const user = await userDB.findOne(value.toLowerCase());
@@ -324,6 +372,20 @@ export async function getById(id: string) {
 
 // helper functions
 
+
+export function randomStr(len: number, arr: string) {
+  var ans = '';
+  for (var i = len; i > 0; i--) {
+    ans +=
+      arr[Math.floor(Math.random() * arr.length)];
+  }
+  return ans;
+}
+
+export async function generateAuthRefreshToken() {
+  return Promise.resolve(randomStr(REFRESH_TOKEN_LENGTH, 'QWERTYUIOPASDFGHJKLZXCVBNM0123456789#$@'))
+
+}
 export async function getUser(id: string) {
   // if (!db.isValidId(id)) throw "User not found";
   const user = await userDB.findOne(id);
