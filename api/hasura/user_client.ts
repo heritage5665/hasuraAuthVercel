@@ -64,7 +64,6 @@ export default class UserClient extends HasuraHttpClient {
                 expired_at
                 user {
                     user_id email phone user_type isVerified password 
-                    referral:invitation_code{code} 
                 }
             }
         }
