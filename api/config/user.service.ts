@@ -96,12 +96,11 @@ export const validateUserIsLogin = async (req: any, res: Response, next: NextFun
   return next();
 }
 
-export const assertNotVerified = async (userQueryResponse: Promise<any>) => {
-  return userQueryResponse.then(user => {
+export const assertNotVerified = async (user:any) => {
     if (!user) return Promise.reject({ error: "user with email not found", msg: "not found", status_code: 404 })
     if (user.isVerified) return Promise.reject({ error: "user already verified", msg: "already verified", status_code: 409 })
     return user
-  })
+
 }
 
 export const validateInput = async (req: any, res: Response, next: NextFunction) => {
@@ -239,9 +238,9 @@ export async function getUserWithEmail(email: string) {
 }
 
 
-export function generateRefreshToken(user: any) {
+export async function generateRefreshToken(user: any) {
   // create a refresh token that expires in 7 days
-  return tokenDB.save({
+  return await tokenDB.save({
     user_id: user.user_id,
     pin: generateOTP(ONE_TIME_PASSWORD_TOKEN_LENGTH),
     expires: expiresIn(7)
