@@ -97,21 +97,26 @@ router.post("/resend-token",
  */
 router.post("/create-token",
   validateEmail,
-  async (req: any, res: Response, next: NextFunction) => {
-    const { email } = req.body
-    await assertNotVerified(await HasuraUser.findOne(email))
-      .then(async (user) => await createVerificationTokenFor(user)
-        .then(async ({ pin }) =>
-          res.status(201).json({
-            status: true,
-            msg: "token created successfully, please check your email",
-            data: { token: pin, auth_token: generateAuthToken(user, 7) }
-          })
-        ))
-      // .catch(err => {
-      //   const { msg, error, status_code } = err
-      //   return errorMessage({ msg, error }, res, status_code)
-      // })
+  async (req: any, res: Response) => {
+    try{
+      const { email } = req.body
+      await assertNotVerified(await HasuraUser.findOne(email))
+        .then(async (user) => await createVerificationTokenFor(user)
+          .then(async ({ pin }) =>
+            res.status(201).json({
+              status: true,
+              msg: "token created successfully, please check your email",
+              data: { token: pin, auth_token: generateAuthToken(user, 7) }
+            })
+          ))
+        
+    }catch(err:any){
+      const {  error, status_code } = err
+      return errorMessage({ msg:"user already verified", error }, res, 401)
+
+      
+    }
+    
   })
 
 /**
