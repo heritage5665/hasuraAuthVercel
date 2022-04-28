@@ -157,7 +157,7 @@ router.post(
   "/login",
   validateLoginInput, validateInput,
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
+    // try {
       const { email, password } = req.body;
       const user = await getVerifiedUserWith(email.toLowerCase())
       if (!user) {
@@ -170,9 +170,9 @@ router.post(
       
       return res.status(200).json(authenticated)
 
-    } catch {
-      return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
-    }
+    // } catch {
+    //   return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
+    // }
 
   }
 );
