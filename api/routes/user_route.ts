@@ -167,6 +167,7 @@ router.post(
       if (!authenticated) {
         return res.json({ error: "Invalid Login credetial", msg: "Email or Password incorrect" }).status(401)
       }
+      
       return res.status(200).json(authenticated)
 
     } catch {

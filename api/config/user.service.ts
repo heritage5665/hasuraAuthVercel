@@ -281,7 +281,7 @@ export async function authenticate({ password }: Authenticate, user: any) {
 
   return {
     ...basicDetails(user),
-    authToken, refreshToken: token
+    authToken, refreshToken: "sometokens"
   };
 }
 
