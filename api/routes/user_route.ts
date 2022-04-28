@@ -108,10 +108,10 @@ router.post("/create-token",
             data: { token: pin, auth_token: generateAuthToken(user, 7) }
           })
         ))
-      .catch(err => {
-        const { msg, error, status_code } = err
-        return errorMessage({ msg, error }, res, status_code)
-      })
+      // .catch(err => {
+      //   const { msg, error, status_code } = err
+      //   return errorMessage({ msg, error }, res, status_code)
+      // })
   })
 
 /**
